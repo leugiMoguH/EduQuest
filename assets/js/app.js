@@ -983,6 +983,7 @@ function scoreAnswer(ok){
     const gems=CG.streak>=3?2:0;CG.gemsEarned+=gems;
     showXP('+'+xp+'XP'+(CG.streak>=3?' 🔥':'')+(gems?' +'+gems+'💎':''));
     vibrate([15,0,15,0,30]);playSound('success');
+    if(CG.streak>=3){const cp=document.getElementById('comboPop');cp.textContent=CG.streak>=10?'🌟 x'+CG.streak+' LENDÁRIO!':CG.streak>=5?'⚡ x'+CG.streak+' INSANO!':'🔥 x'+CG.streak+' COMBO!';cp.classList.remove('show','hide');void cp.offsetWidth;setTimeout(()=>{cp.classList.add('show');setTimeout(()=>{cp.classList.remove('show');cp.classList.add('hide');},1200);},50);}
     // Confetti on streak ≥5 or hard question
     if(CG.streak>=5||(CG.questions[CG.qIndex]&&(CG.questions[CG.qIndex].d===3||(CG.questions[CG.qIndex].d||1)===3)))launchConfetti(40);
   }else{
@@ -999,6 +1000,12 @@ function scoreAnswer(ok){
 }
 function showResult(){
   clearInterval(CG.timer);
+  // Daily challenge completion check
+  const _today=new Date().toISOString().slice(0,10);
+  if(state._dailyGameId===CG.id&&state._dailyDate===_today&&state.dailyCompleted!==_today){
+    state.dailyCompleted=_today;state._dailyGameId=null;state._dailyDate=null;
+    addGems(20);saveState();showToast('🎁 Desafio do Dia completo! +20 💎');
+  }
   // Add game-specific XP → may level up that game
   const newGameLvl = addGameXP(CG.id, CG.xpEarned);
   // Add global XP (gems/badges)
@@ -1503,7 +1510,8 @@ const WORD_FALLBACK=[
   {word:'METAMORFOSE',hint:'Transformação de forma de um animal 🦋',fact:'A metamorfose completa: ovo → larva → pupa → adulto!'},
 ];
 function startWordFallback(diff){
-  CG={id:'word',total:8,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:28,timeLimit:35,timeLeft:35,timer:null,answered:false,qIndex:0,difficulty:diff||1,questions:shuffle(WORD_FALLBACK)};
+  const pool=shuffle([...WORD_FALLBACK,...((window.CONTENT_EXPANSION&&CONTENT_EXPANSION.scrambleWords)||[])]);
+  CG={id:'word',total:8,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:28,timeLimit:35,timeLeft:35,timer:null,answered:false,qIndex:0,difficulty:diff||1,questions:pool.slice(0,8)};
   document.getElementById('wordLvlNum').textContent=diff||1;
   showScreen('wordScreen');renderWord();
 }
@@ -1565,7 +1573,7 @@ const FOF_FALLBACK=[
   {visual:'🐨',text:'As impressões digitais dos koalas são indistinguíveis das humanas.',correct:'Verdade',fact:'São tão parecidas que já confundiram polícias em cenas de crime!'},
 ];
 function startFoFFallback(diff){
-  const qs=shuffle(FOF_FALLBACK).map(q=>({...q,options:['Verdade','Falso']}));
+  const qs=shuffle([...FOF_FALLBACK,...((window.CONTENT_EXPANSION&&CONTENT_EXPANSION.factOrFiction)||[])]).slice(0,10).map(q=>({...q,options:['Verdade','Falso']}));
   CG={id:'fact',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:18,timeLimit:15,timeLeft:15,timer:null,answered:false,qIndex:0,difficulty:diff||1,questions:qs};
   document.getElementById('fofLvlNum').textContent=diff||1;
   showScreen('fofScreen');renderFoF();
@@ -1672,7 +1680,8 @@ function timeCheck(round,timeout){
   setTimeout(()=>{CG.qIndex++;renderTime();},2500);
 }
 function startTimeFallback(diff){
-  CG={id:'time',total:TIME_FALLBACK.length,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:30,timeLimit:35,timeLeft:35,timer:null,answered:false,qIndex:0,difficulty:diff||1,questions:shuffle(TIME_FALLBACK)};
+  const pool=shuffle([...TIME_FALLBACK,...((window.CONTENT_EXPANSION&&CONTENT_EXPANSION.timeMachineRounds)||[])]);
+  CG={id:'time',total:Math.min(6,pool.length),correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:30,timeLimit:35,timeLeft:35,timer:null,answered:false,qIndex:0,difficulty:diff||1,questions:pool};
   document.getElementById('timeLvlNum').textContent=diff||1;
   document.querySelector('#timeScreen .game-subtitle').innerHTML='Ronda <span id="timeQNum">1</span>/'+CG.total+' · Nível <span id="timeLvlNum">'+(diff||1)+'</span>';
   showScreen('timeScreen');renderTime();
@@ -1724,7 +1733,8 @@ function renderEco(){
   });
 }
 function startEcoFallback(diff){
-  CG={id:'eco',total:ECO_FALLBACK.length,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:25,timer:null,answered:false,qIndex:0,difficulty:diff||1,health:60,energy:50,questions:shuffle(ECO_FALLBACK)};
+  const pool=shuffle([...ECO_FALLBACK,...((window.CONTENT_EXPANSION&&CONTENT_EXPANSION.ecoScenarios)||[])]);
+  CG={id:'eco',total:Math.min(6,pool.length),correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:25,timer:null,answered:false,qIndex:0,difficulty:diff||1,health:60,energy:50,questions:pool};
   document.getElementById('ecoLvlNum').textContent=diff||1;
   showScreen('ecoScreen');renderEco();
 }
@@ -1733,9 +1743,15 @@ function startEcoFallback(diff){
 function startWord(){startWordWithAI();}
 
 // ================================================================
+// CONTENT EXPANSION INTEGRATION
+// ================================================================
+if(window.CONTENT_EXPANSION&&CONTENT_EXPANSION.vocab)QB.vocab=CONTENT_EXPANSION.vocab;
+
+// ================================================================
 // INIT
 // ================================================================
 createStars();buildGameGrid();buildAch();buildShop();updateHUD();updateEdu();
+initDayStreak();initFactoDia();initDailyChallenge();
 // Rotate Edu phrases every 8s
 setInterval(()=>{if(document.getElementById('dashboard').classList.contains('active'))updateEdu();},8000);
 // Mute button
@@ -1757,12 +1773,180 @@ document.getElementById('resultHomeBtn').addEventListener('click',goBack);
 document.getElementById('navHome').addEventListener('click',()=>showScreen('dashboard'));
 document.getElementById('navBadges').addEventListener('click',()=>{showScreen('dashboard');setTimeout(()=>document.getElementById('achRow').scrollIntoView({behavior:'smooth'}),200);});
 document.getElementById('navShop').addEventListener('click',()=>{showScreen('dashboard');setTimeout(()=>document.getElementById('shopRow').scrollIntoView({behavior:'smooth'}),200);});
-document.getElementById('navStats').addEventListener('click',()=>{
-  const top = GAMES.filter(g=>getGameProg(g.id).level>1).map(g=>{const p=getGameProg(g.id);return g.emoji+g.name.split(' ')[0]+' Nv.'+p.level;}).slice(0,4).join(' · ');
-  showToast('🎮 '+state.totalPlayed+' jogadas · '+state.totalCorrect+' certas'+(top?' · '+top:''));
-});
+document.getElementById('navStats').addEventListener('click',()=>{renderStats();showScreen('statsScreen');});
 document.getElementById('fofTrueBtn').addEventListener('click',()=>{playSound('click');fofAnswer('Verdade');});
 document.getElementById('fofFalseBtn').addEventListener('click',()=>{playSound('click');fofAnswer('Falso');});
 document.getElementById('wordClearBtn').addEventListener('click',()=>{playSound('click');wordClearAll();});
 document.getElementById('wordCheckBtn').addEventListener('click',()=>{playSound('click');wordVerify();});
+document.getElementById('survivorBtn').addEventListener('click',()=>{playSound('click');initSurvivor();});
+document.getElementById('survivorBackBtn').addEventListener('click',()=>{clearInterval(SV&&SV.timer);goBack();});
+document.getElementById('statsBackBtn').addEventListener('click',()=>showScreen('dashboard'));
 
+// ================================================================
+// FACTO DO DIA
+// ================================================================
+const DAILY_FACTS=[
+  'Os polvos têm 3 corações, 9 cérebros e sangue azul!',
+  'O mel nunca se estraga — pode durar 3000 anos!',
+  'A Lua afasta-se da Terra 3,8 cm por ano.',
+  'Os tubarões existem há mais tempo que as árvores na Terra!',
+  'Uma formiga consegue carregar até 50x o seu próprio peso.',
+  'A Terra gira à volta do Sol a 107.000 km/h!',
+  'Os golfinhos dormem com metade do cérebro de cada vez.',
+  'Portugal tem mais costa marítima do que Espanha!',
+  'O cérebro humano tem 86 mil milhões de neurónios.',
+  'Os elefantes são os únicos mamíferos que não conseguem saltar.',
+  'A fotossíntese produz o oxigénio que respiramos.',
+  'O universo tem 13,8 mil milhões de anos.',
+  'Há mais estrelas no universo que grãos de areia na Terra.',
+  'A velocidade da luz é 300.000 km/s — o limite máximo do universo!',
+  'Os caracóis podem dormir 3 anos seguidos em períodos de seca.',
+  'O coração de uma baleia azul pesa 180kg.',
+  'As borboletas provam as plantas com os pés.',
+  'O plâncton produz mais de 50% do oxigénio que respiramos.',
+  'Um relâmpago tem 300 milhões de volts de eletricidade.',
+  'O Grand Canyon foi criado ao longo de 5 a 6 milhões de anos.',
+  'Os dinossauros existiram durante 165 milhões de anos.',
+  'A Grande Muralha da China tem 21.196 km de comprimento.',
+  'Vasco da Gama chegou à Índia em 1498 abrindo a rota marítima.',
+  'A democracia nasceu em Atenas há 2500 anos.',
+  'O ADN humano teria 2 metros se esticado — por cada célula!',
+  'Há mais de 7000 satélites artificiais a orbitar a Terra.',
+  'Os tubarões podem ter até 50.000 dentes ao longo da vida.',
+  'A Floresta Amazónica produz 20% do oxigénio do planeta.',
+  'O ser humano partilha 98,7% do ADN com os chimpanzés.',
+  'A Lua foi formada há 4,5 mil milhões de anos de uma colisão gigante.',
+  'A pressão no fundo do oceano é 1000x maior que na superfície.',
+  'Os pinguins são o único animal que anda para a frente e para trás.'
+];
+function initFactoDia(){
+  const idx=Math.floor(Date.now()/(1000*60*60*24))%DAILY_FACTS.length;
+  document.getElementById('factoDiaText').textContent=DAILY_FACTS[idx];
+}
+
+// ================================================================
+// DAY STREAK
+// ================================================================
+function initDayStreak(){
+  const today=new Date().toISOString().slice(0,10);
+  const last=state.lastPlayDate||'';
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(!last){state.dayStreak=1;}
+  else if(last===today){/* same day — no change */}
+  else if(last===yesterday){state.dayStreak=(state.dayStreak||1)+1;}
+  else{state.dayStreak=1;}
+  state.lastPlayDate=today;
+  saveState();
+  document.getElementById('dayStreakCount').textContent=state.dayStreak||1;
+}
+
+// ================================================================
+// DAILY CHALLENGE
+// ================================================================
+function initDailyChallenge(){
+  const today=new Date().toISOString().slice(0,10);
+  if(state.dailyCompleted===today)return;
+  const gameIdx=Math.floor(Date.now()/(1000*60*60*24))%GAMES.length;
+  const dg=GAMES[gameIdx];
+  document.getElementById('dailyDesc').textContent='Joga '+dg.emoji+' '+dg.name+' hoje!';
+  document.getElementById('dailyProgFill').style.width='0%';
+  document.getElementById('dailyProgLabel').textContent='0 / 5';
+  const ov=document.getElementById('dailyOverlay');
+  ov.classList.add('show');
+  document.getElementById('dailyStartBtn').onclick=()=>{
+    ov.classList.remove('show');
+    state._dailyGameId=dg.id;state._dailyDate=today;saveState();
+    launchGame(dg.id);
+  };
+  document.getElementById('dailyCloseBtn').onclick=()=>ov.classList.remove('show');
+}
+
+// ================================================================
+// STATS SCREEN
+// ================================================================
+function renderStats(){
+  const body=document.getElementById('statsBody');
+  let html=`<div class="stats-grid-2">
+    <div class="stat-box"><div class="stat-val">${state.globalXP||0}</div><div class="stat-lbl">⚡ XP Total</div></div>
+    <div class="stat-box"><div class="stat-val">${state.totalCorrect||0}</div><div class="stat-lbl">✅ Acertos</div></div>
+    <div class="stat-box"><div class="stat-val">${state.maxStreak||0}</div><div class="stat-lbl">🔥 Streak Máx.</div></div>
+    <div class="stat-box"><div class="stat-val">${state.gems||0}</div><div class="stat-lbl">💎 Gems</div></div>
+  </div>
+  <div class="stats-section-title">🎮 Progressão nos Jogos</div>
+  <div class="stats-games-list">`;
+  GAMES.forEach(g=>{
+    const p=getGameProg(g.id);const lvl=p.level||1;
+    const played=(state.gamesPlayed||[]).includes(g.id);
+    html+=`<div class="stats-game-row${played?'':' locked'}">
+      <span class="stats-game-emoji">${g.emoji}</span>
+      <div class="stats-game-info"><div class="stats-game-name">${g.name}</div><div class="stats-game-sub">Nível ${lvl}/10</div></div>
+      <div class="stats-lvl-badge" style="background:${g.color}22;color:${g.color};border:1px solid ${g.color}44">Nv.${lvl}</div>
+    </div>`;
+  });
+  html+=`</div><div class="stats-section-title">📅 Streak</div>
+  <div class="stats-streak-row"><span style="font-size:2rem">🔥</span><div><div style="font-size:1.6rem;font-weight:800;color:var(--gold)">${state.dayStreak||1}</div><div style="font-size:.75rem;color:var(--text2)">dias consecutivos</div></div>
+  <span style="font-size:2rem">🏆</span><div><div style="font-size:1.6rem;font-weight:800;color:var(--gold)">${state.maxStreak||0}</div><div style="font-size:.75rem;color:var(--text2)">streak máximo</div></div></div>`;
+  body.innerHTML=html;
+}
+
+// ================================================================
+// SURVIVOR MODE
+// ================================================================
+let SV=null;
+function initSurvivor(){
+  const pool=[];
+  Object.keys(QB).forEach(cat=>{if(Array.isArray(QB[cat]))pool.push(...QB[cat]);});
+  if(pool.length<4){showToast('⚠️ Sem perguntas suficientes!');return;}
+  SV={questions:shuffle(pool),qIndex:0,score:0,timeLeft:60,timer:null,highScore:parseInt(localStorage.getItem('eq_sv_hs')||'0')};
+  showScreen('survivorScreen');
+  document.getElementById('survivorScore').textContent='✅ 0';
+  document.getElementById('survivorTime').textContent='60';
+  document.getElementById('survivorTimerFill').style.width='100%';
+  document.getElementById('survivorTimerFill').style.background='';
+  SV.timer=setInterval(survivorTick,1000);
+  renderSurvivorQ();
+}
+function survivorTick(){
+  SV.timeLeft--;
+  document.getElementById('survivorTime').textContent=SV.timeLeft;
+  document.getElementById('survivorTimerFill').style.width=(SV.timeLeft/60*100)+'%';
+  if(SV.timeLeft<=10)document.getElementById('survivorTimerFill').style.background='var(--red,#ef4444)';
+  if(SV.timeLeft<=0){clearInterval(SV.timer);survivorEnd();}
+}
+function renderSurvivorQ(){
+  if(!SV)return;
+  if(SV.qIndex>=SV.questions.length){SV.questions=shuffle(SV.questions);SV.qIndex=0;}
+  const q=SV.questions[SV.qIndex];
+  document.getElementById('survivorVisual').textContent=q.v||'❓';
+  document.getElementById('survivorText').textContent=q.t||'';
+  const optsEl=document.getElementById('survivorOptions');optsEl.innerHTML='';
+  (q.o||[]).forEach(opt=>{
+    const btn=document.createElement('button');btn.className='option-btn';btn.textContent=opt;
+    btn.addEventListener('click',()=>survivorAnswer(opt,q));
+    optsEl.appendChild(btn);
+  });
+}
+function survivorAnswer(choice,q){
+  if(!SV)return;
+  const ok=choice===q.c;
+  document.getElementById('survivorOptions').querySelectorAll('.option-btn').forEach(b=>{
+    b.classList.add('disabled');
+    if(b.textContent===q.c)b.classList.add('correct');
+    if(!ok&&b.textContent===choice)b.classList.add('wrong');
+  });
+  if(ok){SV.score++;document.getElementById('survivorScore').textContent='✅ '+SV.score;vibrate([15,0,15]);playSound('success');}
+  else{SV.timeLeft=Math.max(0,SV.timeLeft-5);document.getElementById('survivorTime').textContent=SV.timeLeft;document.getElementById('survivorTimerFill').style.width=(SV.timeLeft/60*100)+'%';vibrate([100]);playSound('error');shakeScreen();}
+  SV.qIndex++;
+  setTimeout(renderSurvivorQ,ok?400:800);
+}
+function survivorEnd(){
+  if(!SV)return;
+  const isNew=SV.score>SV.highScore;
+  if(isNew)localStorage.setItem('eq_sv_hs',SV.score);
+  const gems=SV.score*2,xp=SV.score*15;
+  addGems(gems);addGlobalXP(xp);saveState();
+  showScreen('dashboard');
+  showToast('⚡ '+SV.score+' acertos · +'+xp+'XP · +'+gems+'💎'+(isNew?' 🏆 NOVO RECORDE!':''));
+  if(SV.score>=5)launchConfetti(60);
+  SV=null;
+}
