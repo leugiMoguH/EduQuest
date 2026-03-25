@@ -10,6 +10,7 @@
 <div class="stars" id="stars"></div>
 <canvas id="confettiCanvas"></canvas>
 <div class="xp-popup" id="xpPop">+XP</div>
+<div class="combo-pop" id="comboPop"></div>
 <div class="toast" id="toast"></div>
 <div class="levelup-overlay" id="lvlOverlay">
   <div class="levelup-box">
@@ -17,6 +18,22 @@
     <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--gold);margin:8px 0">NÍVEL <span id="newLvl">2</span>!</div>
     <div style="color:var(--text2);margin-bottom:20px;font-size:.9rem">Incrível! Continua a explorar!</div>
     <button class="big-btn" id="lvlCloseBtn">Continuar 🚀</button>
+  </div>
+</div>
+
+<!-- DAILY CHALLENGE OVERLAY -->
+<div class="daily-overlay" id="dailyOverlay">
+  <div class="daily-box">
+    <div class="daily-icon">🗓️</div>
+    <div class="daily-title">Desafio do Dia</div>
+    <div class="daily-desc" id="dailyDesc">Completa o desafio de hoje!</div>
+    <div class="daily-progress-wrap">
+      <div class="daily-prog-bar"><div class="daily-prog-fill" id="dailyProgFill" style="width:0%"></div></div>
+      <div class="daily-prog-label" id="dailyProgLabel">0 / 5</div>
+    </div>
+    <div class="daily-reward" id="dailyReward">🎁 Recompensa: 20 💎</div>
+    <button class="big-btn" id="dailyStartBtn">Jogar Agora!</button>
+    <button class="big-btn secondary" id="dailyCloseBtn">Mais Tarde</button>
   </div>
 </div>
 
@@ -42,6 +59,7 @@
     <div class="header-stats">
       <div class="stat-pill">💎 <span id="gemCount">0</span></div>
       <div class="stat-pill">⚡ <span id="xpCount">0</span></div>
+      <div class="stat-pill streak-pill" id="dayStreakPill">🔥 <span id="dayStreakCount">0</span>d</div>
       <button class="mute-btn" id="muteBtn">🔊</button>
     </div>
   </div>
@@ -56,12 +74,28 @@
     </div>
     <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpFill" style="width:0%"></div></div>
   </div>
+  <div class="facto-dia" id="factoDia">
+    <div class="facto-icon">💡</div>
+    <div>
+      <div class="facto-label">FACTO DO DIA</div>
+      <div class="facto-text" id="factoDiaText">A carregar...</div>
+    </div>
+  </div>
   <div class="section-title">🎯 Mini-Jogos</div>
   <div class="game-grid" id="gameGrid"></div>
   <div class="section-title">🏅 Conquistas</div>
   <div class="achievements-row" id="achRow"></div>
   <div class="section-title">🛒 Loja de Power-ups</div>
   <div class="shop-row" id="shopRow"></div>
+  <div class="section-title">⚡ Modo Especial</div>
+  <div class="survivor-card" id="survivorCard">
+    <div class="survivor-icon">⏱️</div>
+    <div class="survivor-info">
+      <div class="survivor-title">Modo Sobrevivente</div>
+      <div class="survivor-sub">60 segundos · Máximo de perguntas · -5s por erro</div>
+    </div>
+    <button class="survivor-btn" id="survivorBtn">JOGAR</button>
+  </div>
 </div>
 
 <!-- UNIVERSAL GAME SCREEN (used by all AI games) -->
@@ -197,7 +231,7 @@
 <div id="timeScreen" class="screen">
   <div class="game-header">
     <div class="back-btn" id="timeBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">⏳ Time Machine</div><div class="game-subtitle">Ronda <span id="timeQNum">1</span>/8 · Nível <span id="timeLvlNum">1</span></div></div>
+    <div class="game-title-block"><div class="game-title">⏳ Time Machine</div><div class="game-subtitle">Ronda <span id="timeQNum">1</span>/4 · Nível <span id="timeLvlNum">1</span></div></div>
     <div class="stat-pill">⚡ <span id="timeXP">0</span></div>
   </div>
   <div class="game-progress-bar"><div class="game-progress-fill" id="timeProgressFill" style="width:0%"></div></div>
@@ -218,11 +252,16 @@
 <div id="ecoScreen" class="screen">
   <div class="game-header">
     <div class="back-btn" id="ecoBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">🌱 Eco-Tycoon</div><div class="game-subtitle">Nível <span id="ecoQNum">1</span>/8 · Dif. <span id="ecoLvlNum">1</span></div></div>
+    <div class="game-title-block"><div class="game-title">🌱 Eco-Tycoon</div><div class="game-subtitle">Nível <span id="ecoQNum">1</span>/4 · Dif. <span id="ecoLvlNum">1</span></div></div>
     <div class="stat-pill">⚡ <span id="ecoXP">0</span></div>
   </div>
   <div class="game-progress-bar"><div class="game-progress-fill" id="ecoProgressFill" style="width:0%"></div></div>
   <div class="game-area">
+    <div class="round-info">
+      <div class="round-badge" id="ecoRoundBadge">🌱 1/4</div>
+      <div class="streak-badge">🔥 <span id="ecoStreak">0</span></div>
+      <div class="timer-badge" id="ecoTimerBadge">⏱ <span id="ecoTimer">45</span>s</div>
+    </div>
     <div class="eco-res" id="ecoRes"></div>
     <div style="font-size:.85rem;font-weight:800;text-align:center;margin-bottom:10px" id="ecoChallenge"></div>
     <div class="eco-acts" id="ecoActs"></div>
@@ -276,6 +315,41 @@
     <button class="big-btn secondary" id="resultHomeBtn">Dashboard 🏠</button>
   </div>
 </div>
+
+<!-- STATS SCREEN -->
+<div id="statsScreen" class="screen">
+  <div class="game-header">
+    <div class="back-btn" id="statsBackBtn">←</div>
+    <div class="game-title-block"><div class="game-title">📊 As Tuas Estatísticas</div></div>
+  </div>
+  <div class="stats-body" id="statsBody">
+    <!-- preenchido via JS -->
+  </div>
+</div>
+
+<!-- SURVIVOR MODE SCREEN -->
+<div id="survivorScreen" class="screen">
+  <div class="game-header">
+    <div class="back-btn" id="survivorBackBtn">←</div>
+    <div class="game-title-block">
+      <div class="game-title">⚡ Modo Sobrevivente</div>
+      <div class="game-subtitle">Responde ao máximo!</div>
+    </div>
+    <div class="stat-pill" id="survivorScore">✅ 0</div>
+  </div>
+  <div class="survivor-timer-bar">
+    <div class="survivor-timer-fill" id="survivorTimerFill" style="width:100%"></div>
+  </div>
+  <div class="survivor-time" id="survivorTime">60</div>
+  <div class="game-area">
+    <div class="q-card">
+      <div class="q-visual" id="survivorVisual">❓</div>
+      <div class="q-text" id="survivorText">...</div>
+    </div>
+    <div class="options-grid" id="survivorOptions"></div>
+  </div>
+</div>
+
 </div><!-- /app -->
 
 <div class="bottom-nav">
@@ -285,6 +359,7 @@
   <div class="nav-btn" id="navStats"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></div>
 </div>
 
+<script src="assets/js/content-expansion.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

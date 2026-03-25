@@ -743,7 +743,7 @@ function launchConfetti(n=80){
     });
   }
   playSound('confetti');
-  if(!confettiParts._anim) animConfetti();
+  if(!confettiParts._anim){confettiParts._anim=true;animConfetti();}
 }
 function animConfetti(){
   const cv=document.getElementById('confettiCanvas');
@@ -758,7 +758,7 @@ function animConfetti(){
     ctx2.restore();return true;
   });
   if(confettiParts.length>0)requestAnimationFrame(animConfetti);
-  else ctx2.clearRect(0,0,cv.width,cv.height);
+  else{ctx2.clearRect(0,0,cv.width,cv.height);confettiParts._anim=false;}
 }
 
 // ================================================================
@@ -864,7 +864,7 @@ function usePowerup(type){
             document.querySelectorAll('#gameOptions .option-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===(q?.c||q?.correct))b.classList.add('correct');});
             const f=q?.f||q?.fact;if(f){document.getElementById('gameFactText').textContent=f;document.getElementById('gameFact').classList.add('show');}
             playSound('error');vibrate([100]);
-            setTimeout(()=>{CG.qIndex++;renderAIQ();},4500);
+            setTimeout(()=>{CG.qIndex++;renderAIQ();},2500);
           }
         }
       },1000);
@@ -910,7 +910,7 @@ const GAMES=[
 const ACHS=[
   {id:'first',  emoji:'🥇',name:'Primeira Vitória',   check:s=>s.totalCorrect>=1},
   {id:'streak5',emoji:'🔥',name:'Streak x5',           check:s=>(s.maxStreak||0)>=5},
-  {id:'level3', emoji:'⭐',name:'Nível 3',              check:s=>s.level>=3},
+  {id:'level3', emoji:'⭐',name:'Nível 3',              check:s=>s.globalLevel>=3},
   {id:'gems50', emoji:'💎',name:'50 Gems',              check:s=>s.gems>=50},
   {id:'explorer',emoji:'🗺️',name:'Explorador (5 jogos)',check:s=>(s.gamesPlayed||[]).length>=5},
   {id:'master', emoji:'🏆',name:'Mestre (10 jogos)',    check:s=>(s.gamesPlayed||[]).length>=10},
@@ -1174,7 +1174,7 @@ function renderAIQ(){
       scoreAnswer(ok);
       document.getElementById('gameStreak').textContent=CG.streak;
       const qfact=q.f||q.fact; if(qfact){document.getElementById('gameFactText').textContent=qfact;document.getElementById('gameFact').classList.add('show');}
-      setTimeout(()=>{CG.qIndex++;renderAIQ();},4500);
+      setTimeout(()=>{CG.qIndex++;renderAIQ();},2500);
     });
     grid.appendChild(btn);
   });
@@ -1190,7 +1190,7 @@ function renderAIQ(){
         const tq=CG.questions[CG.qIndex];grid.querySelectorAll('.option-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===(tq?.c||tq?.correct))b.classList.add('correct');});
         const tqf=tq?.f||tq?.fact;if(tqf){document.getElementById('gameFactText').textContent=tqf;document.getElementById('gameFact').classList.add('show');}
         snd('wrong');vibrate([100]);
-        setTimeout(()=>{CG.qIndex++;renderAIQ();},4500);
+        setTimeout(()=>{CG.qIndex++;renderAIQ();},2500);
       }
     }
   },1000);
@@ -1239,7 +1239,7 @@ const FALLBACK={
 };
 // Generic fallback for games without specific fallback
 function getFallback(id){
-  return FALLBACK[id]||FALLBACK.capital;
+  return FALLBACK[id]||null;
 }
 function startAIGameFallback(id,title,timeLimit,xpPerQ,diff){
   const qs=shuffle(getFallback(id));
@@ -1336,12 +1336,12 @@ function renderGeo(){
       document.getElementById('geoStreak').textContent=CG.streak;
       document.getElementById('geoFactText').textContent=q.fact;
       document.getElementById('geoFact').classList.add('show');
-      setTimeout(()=>{CG.qIndex++;renderGeo();},4500);
+      setTimeout(()=>{CG.qIndex++;renderGeo();},2500);
     });
     grid.appendChild(btn);
   });
   document.getElementById('geoTimer').textContent=CG.timeLeft;
-  CG.timer=setInterval(()=>{CG.timeLeft--;document.getElementById('geoTimer').textContent=CG.timeLeft;if(CG.timeLeft<=4)document.getElementById('geoTimerBadge').classList.add('urgent');if(CG.timeLeft<=0){clearInterval(CG.timer);if(!CG.answered){CG.answered=true;CG.streak=0;state.totalPlayed++;saveState();grid.querySelectorAll('.option-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===q.country)b.classList.add('correct');});document.getElementById('geoFactText').textContent=q.fact;document.getElementById('geoFact').classList.add('show');snd('wrong');vibrate([100]);setTimeout(()=>{CG.qIndex++;renderGeo();},4500);}}},1000);
+  CG.timer=setInterval(()=>{CG.timeLeft--;document.getElementById('geoTimer').textContent=CG.timeLeft;if(CG.timeLeft<=4)document.getElementById('geoTimerBadge').classList.add('urgent');if(CG.timeLeft<=0){clearInterval(CG.timer);if(!CG.answered){CG.answered=true;CG.streak=0;state.totalPlayed++;saveState();grid.querySelectorAll('.option-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===q.country)b.classList.add('correct');});document.getElementById('geoFactText').textContent=q.fact;document.getElementById('geoFact').classList.add('show');snd('wrong');vibrate([100]);setTimeout(()=>{CG.qIndex++;renderGeo();},2500);}}},1000);
 }
 
 // ================================================================
@@ -1404,7 +1404,7 @@ function renderMath(){
 // LOGIC MATRIX (procedural - infinite variety)
 // ================================================================
 function genLogicQ(){
-  const lvl=state.level;
+  const lvl=(getGameProg&&getGameProg('logic'))?getGameProg('logic').level:1;
   const types=lvl<=2?['arith','geo2']:lvl<=5?['arith','geo','fib','sq']:['arith','geo','fib','sq','prime','comb'];
   const t=types[rnd(0,types.length-1)];
   let seq,answer,opts,fact;
@@ -1475,28 +1475,18 @@ function renderLogic(){
       document.getElementById('logicStreak').textContent=CG.streak;
       document.getElementById('logicFactText').textContent=q.fact;
       document.getElementById('logicFact').classList.add('show');
-      setTimeout(()=>{CG.qIndex++;renderLogic();},4500);
+      setTimeout(()=>{CG.qIndex++;renderLogic();},2500);
     });
     grid.appendChild(btn);
   });
   document.getElementById('logicTimer').textContent=CG.timeLeft;
-  CG.timer=setInterval(()=>{CG.timeLeft--;document.getElementById('logicTimer').textContent=CG.timeLeft;if(CG.timeLeft<=6)document.getElementById('logicTimerBadge').classList.add('urgent');if(CG.timeLeft<=0){clearInterval(CG.timer);if(!CG.answered){CG.answered=true;CG.streak=0;state.totalPlayed++;saveState();grid.querySelectorAll('.option-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===q.answer)b.classList.add('correct');});document.getElementById('logicFactText').textContent=q.fact;document.getElementById('logicFact').classList.add('show');snd('wrong');vibrate([100]);setTimeout(()=>{CG.qIndex++;renderLogic();},4500);}}},1000);
+  CG.timer=setInterval(()=>{CG.timeLeft--;document.getElementById('logicTimer').textContent=CG.timeLeft;if(CG.timeLeft<=6)document.getElementById('logicTimerBadge').classList.add('urgent');if(CG.timeLeft<=0){clearInterval(CG.timer);if(!CG.answered){CG.answered=true;CG.streak=0;state.totalPlayed++;saveState();grid.querySelectorAll('.option-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===q.answer)b.classList.add('correct');});document.getElementById('logicFactText').textContent=q.fact;document.getElementById('logicFact').classList.add('show');snd('wrong');vibrate([100]);setTimeout(()=>{CG.qIndex++;renderLogic();},2500);}}},1000);
 }
 
 // ================================================================
 // WORD SCRAMBLE (AI-powered)
 // ================================================================
 let wordAns=[],wordTilesData=[];
-function startWord(){
-  generateAIQuestions('word_scramble_special',
-    (qs,diff)=>{
-      CG={id:'word',total:Math.min(8,qs.length),correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:28,timeLimit:35,timeLeft:35,timer:null,answered:false,qIndex:0,difficulty:diff,questions:qs};
-      document.getElementById('wordLvlNum').textContent=diff;
-      showScreen('wordScreen');renderWord();
-    },
-    (diff)=>startWordFallback(diff)
-  );
-}
 // Reuse code prompt but parse as word questions
 function startWordWithAI(){
   const _p=getGameProg('word');
@@ -1541,7 +1531,7 @@ function renderWord(){
   CG.timer=setInterval(()=>{CG.timeLeft--;document.getElementById('wordTimer').textContent=CG.timeLeft;if(CG.timeLeft<=8)document.getElementById('wordTimerBadge').classList.add('urgent');if(CG.timeLeft<=0){clearInterval(CG.timer);if(!CG.answered)wordResolve(false,q);}},1000);
 }
 function wordAdd(idx,lt,tile){const q=CG.questions[CG.qIndex],word=q.word||q.text||'';if(wordAns.length>=word.length)return;tile.classList.add('used');wordAns.push({idx,lt});const slots=document.querySelectorAll('.a-slot');const pos=wordAns.length-1;slots[pos].textContent=lt;slots[pos].classList.add('filled');vibrate([5]);}
-function wordRemove(pos){if(pos>=wordAns.length)return;const rem=wordAns[pos];wordAns.splice(pos);document.querySelectorAll('.s-tile').forEach(t=>{if(parseInt(t.dataset.ti)===rem.idx)t.classList.remove('used');});document.querySelectorAll('.a-slot').forEach((s,i)=>{if(i>=pos){s.textContent='';s.classList.remove('filled');}});}
+function wordRemove(pos){if(pos>=wordAns.length)return;const rem=wordAns[pos];wordAns.splice(pos,1);document.querySelectorAll('.s-tile').forEach(t=>{if(parseInt(t.dataset.ti)===rem.idx)t.classList.remove('used');});document.querySelectorAll('.a-slot').forEach((s,i)=>{if(i>=pos){s.textContent='';s.classList.remove('filled');}});}
 function wordClearAll(){wordAns=[];document.querySelectorAll('.s-tile').forEach(t=>t.classList.remove('used'));document.querySelectorAll('.a-slot').forEach(s=>{s.textContent='';s.classList.remove('filled','correct','wrong');});}
 function wordVerify(){const q=CG.questions[CG.qIndex];const word=q.word||q.text||'';if(wordAns.length<word.length){showToast('Completa a palavra!');return;}wordResolve(wordAns.map(x=>x.lt).join('')===word,q);}
 function wordResolve(ok,q){
@@ -1552,7 +1542,7 @@ function wordResolve(ok,q){
   else{word.split('').forEach((lt,i)=>{if(slots[i]){slots[i].textContent=lt;slots[i].classList.add('wrong');}});CG.streak=0;snd('wrong');vibrate([80]);state.totalPlayed++;saveState();}
   document.getElementById('wordFactText').textContent=ok?'🎉 '+word+'! '+(q.fact||''):'Era: '+word+'. '+(q.fact||'');
   document.getElementById('wordFact').classList.add('show');
-  setTimeout(()=>{CG.qIndex++;renderWord();},4500);
+  setTimeout(()=>{CG.qIndex++;renderWord();},2500);
 }
 
 // ================================================================
@@ -1615,7 +1605,7 @@ function fofAnswer(choice){
   document.getElementById('fofStreak').textContent=CG.streak;
   document.getElementById('fofFactText').textContent=(q.correct==='Verdade'?'✅ É VERDADE: ':'❌ É FALSO: ')+q.fact;
   document.getElementById('fofFact').classList.add('show');
-  setTimeout(()=>{CG.qIndex++;renderFoF();},4500);
+  setTimeout(()=>{CG.qIndex++;renderFoF();},2500);
 }
 
 // ================================================================
@@ -1679,11 +1669,12 @@ function timeCheck(round,timeout){
   if(timeout){state.totalPlayed++;saveState();}
   document.getElementById('timeFactText').textContent=round.fact||'';
   document.getElementById('timeFact').classList.add('show');
-  setTimeout(()=>{CG.qIndex++;renderTime();},4500);
+  setTimeout(()=>{CG.qIndex++;renderTime();},2500);
 }
 function startTimeFallback(diff){
   CG={id:'time',total:TIME_FALLBACK.length,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:30,timeLimit:35,timeLeft:35,timer:null,answered:false,qIndex:0,difficulty:diff||1,questions:shuffle(TIME_FALLBACK)};
   document.getElementById('timeLvlNum').textContent=diff||1;
+  document.querySelector('#timeScreen .game-subtitle').innerHTML='Ronda <span id="timeQNum">1</span>/'+CG.total+' · Nível <span id="timeLvlNum">'+(diff||1)+'</span>';
   showScreen('timeScreen');renderTime();
 }
 
@@ -1701,6 +1692,8 @@ const ECO_FALLBACK=[
 function renderEco(){
   if(CG.qIndex>=CG.total){showResult();return;}
   clearInterval(CG.timer);CG.answered=false;
+  CG.timeLeft=45;document.getElementById('ecoTimer').textContent=CG.timeLeft;document.getElementById('ecoTimerBadge').classList.remove('urgent');
+  CG.timer=setInterval(()=>{CG.timeLeft--;document.getElementById('ecoTimer').textContent=CG.timeLeft;if(CG.timeLeft<=8)document.getElementById('ecoTimerBadge').classList.add('urgent');if(CG.timeLeft<=0){clearInterval(CG.timer);if(!CG.answered){CG.answered=true;CG.streak=0;scoreAnswer(false);document.getElementById('ecoFact').classList.add('show');setTimeout(()=>{CG.qIndex++;renderEco();},2500);}}},1000);
   const ch=CG.questions[CG.qIndex];
   document.getElementById('ecoQNum').textContent=CG.qIndex+1;
   document.getElementById('ecoXP').textContent=CG.xpEarned;
@@ -1725,7 +1718,7 @@ function renderEco(){
       scoreAnswer(act.correct);
       document.getElementById('ecoFactText').textContent=(act.feedback||'')+' '+(ch.fact||'');
       document.getElementById('ecoFact').classList.add('show');
-      setTimeout(()=>{CG.qIndex++;renderEco();},4500);
+      setTimeout(()=>{CG.qIndex++;renderEco();},2500);
     });
     actsEl.appendChild(d);
   });

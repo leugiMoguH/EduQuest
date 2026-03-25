@@ -253,3 +253,68 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .game-card-lvl{font-size:.65rem;font-weight:900;color:var(--gold);margin-top:2px;letter-spacing:.5px;}
 .lvl-max{color:var(--cyan)!important;}
 
+
+/* ===== STATS SCREEN ===== */
+.stats-body{padding:16px 20px;}
+.stat-section-title{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--text2);margin:16px 0 10px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--rs);padding:14px;text-align:center;backdrop-filter:blur(10px);}
+.stat-card-val{font-family:'Fredoka One',cursive;font-size:1.6rem;background:linear-gradient(135deg,var(--accent2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;}
+.stat-card-lbl{font-size:.65rem;color:var(--text2);font-weight:800;margin-top:2px;}
+.game-stat-row{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;margin-bottom:8px;backdrop-filter:blur(8px);}
+.game-stat-icon{font-size:1.5rem;flex-shrink:0;}
+.game-stat-info{flex:1;}
+.game-stat-name{font-size:.8rem;font-weight:800;}
+.game-stat-detail{font-size:.65rem;color:var(--text2);font-weight:700;}
+.game-stat-lvl{font-family:'Fredoka One',cursive;font-size:.9rem;color:var(--gold);}
+.activity-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:16px;}
+.activity-cell{aspect-ratio:1;border-radius:3px;background:rgba(255,255,255,.05);}
+.activity-cell.a1{background:rgba(124,58,237,.3);}
+.activity-cell.a2{background:rgba(124,58,237,.6);}
+.activity-cell.a3{background:rgba(124,58,237,.9);}
+
+/* ===== DAILY CHALLENGE ===== */
+.daily-overlay{position:fixed;inset:0;z-index:100;background:rgba(13,13,26,.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s;}
+.daily-overlay.show{opacity:1;pointer-events:all;}
+.daily-box{background:var(--bg3);border:2px solid var(--gold);border-radius:24px;padding:32px 28px;text-align:center;box-shadow:0 0 60px rgba(245,158,11,.3);max-width:340px;width:90%;}
+.daily-icon{font-size:3.5rem;margin-bottom:8px;}
+.daily-title{font-family:'Fredoka One',cursive;font-size:1.5rem;color:var(--gold);margin-bottom:6px;}
+.daily-desc{font-size:.85rem;color:var(--text2);font-weight:700;margin-bottom:16px;line-height:1.4;}
+.daily-progress-wrap{margin-bottom:12px;}
+.daily-prog-bar{background:rgba(255,255,255,.1);border-radius:99px;height:10px;overflow:hidden;margin-bottom:6px;}
+.daily-prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--pink));transition:width .6s ease;}
+.daily-prog-label{font-size:.75rem;color:var(--text2);font-weight:800;}
+.daily-reward{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:8px 14px;font-size:.8rem;font-weight:800;color:var(--gold);margin-bottom:16px;}
+
+/* ===== FACTO DO DIA ===== */
+.facto-dia{display:flex;align-items:flex-start;gap:12px;background:linear-gradient(135deg,rgba(6,182,212,.15),rgba(124,58,237,.15));border:1px solid rgba(6,182,212,.3);border-radius:var(--r);padding:14px 16px;margin:0 20px 16px;backdrop-filter:blur(10px);}
+.facto-icon{font-size:1.6rem;flex-shrink:0;margin-top:2px;}
+.facto-label{font-size:.6rem;font-weight:900;color:var(--cyan);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}
+.facto-text{font-size:.82rem;font-weight:700;line-height:1.4;color:var(--text);}
+
+/* ===== COMBO MULTIPLIER ===== */
+.combo-pop{position:fixed;top:30%;left:50%;transform:translateX(-50%) scale(0);font-family:'Fredoka One',cursive;font-size:2rem;color:var(--gold);z-index:500;pointer-events:none;text-shadow:0 0 20px rgba(245,158,11,.8);transition:transform .25s cubic-bezier(.34,1.56,.64,1),opacity .4s;white-space:nowrap;}
+.combo-pop.show{transform:translateX(-50%) scale(1);}
+.combo-pop.hide{opacity:0;transform:translateX(-50%) translateY(-30px) scale(.7);}
+
+/* ===== SURVIVOR MODE ===== */
+.survivor-card{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(245,158,11,.15));border:1px solid rgba(239,68,68,.3);border-radius:var(--r);padding:16px 18px;margin:0 20px 24px;cursor:pointer;}
+.survivor-icon{font-size:2rem;flex-shrink:0;}
+.survivor-info{flex:1;}
+.survivor-title{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--text);}
+.survivor-sub{font-size:.7rem;color:var(--text2);font-weight:700;margin-top:2px;}
+.survivor-btn{background:linear-gradient(135deg,#ef4444,#f97316);border:none;border-radius:10px;color:white;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:900;padding:10px 18px;cursor:pointer;flex-shrink:0;transition:transform .15s;}
+.survivor-btn:active{transform:scale(.93);}
+.survivor-timer-bar{height:8px;background:rgba(255,255,255,.1);overflow:hidden;}
+.survivor-timer-fill{height:100%;background:linear-gradient(90deg,#10b981,#f59e0b,#ef4444);transition:width .5s linear;transform-origin:left;}
+.survivor-time{font-family:'Fredoka One',cursive;font-size:3rem;text-align:center;padding:10px 0;background:linear-gradient(135deg,#ef4444,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+/* ===== DAY STREAK PILL ===== */
+.streak-pill{background:linear-gradient(135deg,rgba(245,158,11,.2),rgba(239,68,68,.2))!important;border-color:rgba(245,158,11,.4)!important;}
+
+/* ===== POWERUP BAR ===== */
+.powerup-bar{display:flex;gap:8px;margin-bottom:12px;justify-content:center;}
+.pu-btn{background:var(--glass2);border:1px solid var(--border);border-radius:10px;padding:6px 12px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text);transition:transform .15s;display:flex;align-items:center;gap:4px;}
+.pu-btn:active{transform:scale(.92);}
+.pu-btn:disabled{opacity:.4;pointer-events:none;}
+.pu-count{background:var(--accent);border-radius:99px;padding:1px 6px;font-size:.65rem;color:white;}
