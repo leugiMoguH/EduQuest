@@ -1,493 +1,3 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EduQuest 20</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
-:root{
-  --bg:#0d0d1a;--bg2:#13132a;--bg3:#1a1a38;
-  --glass:rgba(255,255,255,0.06);--glass2:rgba(255,255,255,0.10);
-  --border:rgba(255,255,255,0.12);
-  --accent:#7c3aed;--accent2:#a855f7;--gold:#f59e0b;
-  --green:#10b981;--red:#ef4444;--cyan:#06b6d4;--pink:#ec4899;
-  --text:#f0f0ff;--text2:#a0a0c0;--r:20px;--rs:12px;
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(124,58,237,.18) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 80% 80%,rgba(6,182,212,.12) 0%,transparent 60%);pointer-events:none;z-index:0;}
-.stars{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
-.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--d,3s) ease-in-out infinite alternate;}
-@keyframes twinkle{from{opacity:.1;transform:scale(.8)}to{opacity:.9;transform:scale(1.2)}}
-#app{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:80px;}
-.screen{display:none;animation:fadeIn .35s ease;}
-.screen.active{display:block;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-
-/* HEADER */
-.header{padding:18px 20px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--bg) 80%,transparent);}
-.logo{font-family:'Fredoka One',cursive;font-size:1.6rem;background:linear-gradient(135deg,#a855f7,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.header-stats{display:flex;gap:10px;align-items:center;}
-.stat-pill{display:flex;align-items:center;gap:5px;background:var(--glass2);border:1px solid var(--border);border-radius:30px;padding:5px 12px;font-size:.85rem;font-weight:700;backdrop-filter:blur(10px);}
-.xp-section{margin:8px 20px 16px;background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;backdrop-filter:blur(12px);}
-.xp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.level-badge{background:linear-gradient(135deg,var(--accent),var(--cyan));border-radius:8px;padding:3px 10px;font-family:'Fredoka One',cursive;font-size:.9rem;box-shadow:0 0 14px rgba(124,58,237,.5);}
-.xp-text{font-size:.8rem;color:var(--text2);font-weight:700;}
-.xp-bar-bg{background:rgba(255,255,255,.1);border-radius:99px;height:10px;overflow:hidden;}
-.xp-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--cyan));transition:width .8s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;}
-.xp-bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 2s infinite;}
-@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-
-/* GAME GRID */
-.section-title{padding:0 20px 12px;font-family:'Fredoka One',cursive;font-size:1.15rem;color:var(--text2);}
-.game-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 20px 20px;}
-.game-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:16px 8px 12px;text-align:center;cursor:pointer;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;backdrop-filter:blur(10px);user-select:none;}
-.game-card:active{transform:scale(.93);}
-.game-card-emoji{font-size:2.2rem;display:block;margin-bottom:6px;line-height:1;}
-.game-card-name{font-size:.7rem;font-weight:800;color:var(--text);line-height:1.2;}
-.game-card-num{position:absolute;top:6px;right:8px;font-size:.6rem;font-weight:800;color:var(--text2);}
-.ai-badge{position:absolute;top:6px;left:6px;background:linear-gradient(135deg,var(--accent),var(--cyan));color:white;border-radius:4px;font-size:.5rem;font-weight:900;padding:2px 5px;letter-spacing:.5px;}
-.game-card .glow{position:absolute;inset:0;border-radius:var(--r);opacity:0;transition:opacity .3s;}
-.game-card:hover .glow{opacity:1;}
-
-/* ACHIEVEMENTS & SHOP */
-.achievements-row,.shop-row{display:flex;gap:10px;padding:0 20px 20px;overflow-x:auto;scrollbar-width:none;}
-.achievements-row::-webkit-scrollbar,.shop-row::-webkit-scrollbar{display:none;}
-.badge-card{flex-shrink:0;background:var(--glass);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;text-align:center;min-width:90px;backdrop-filter:blur(10px);}
-.badge-card .badge-icon{font-size:1.8rem;display:block;margin-bottom:4px;}
-.badge-card .badge-name{font-size:.65rem;font-weight:800;color:var(--text2);}
-.badge-card.earned{border-color:var(--gold);background:rgba(245,158,11,.12);}
-.badge-card.earned .badge-name{color:var(--gold);}
-.shop-item{flex-shrink:0;background:var(--glass);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;min-width:110px;text-align:center;cursor:pointer;backdrop-filter:blur(10px);transition:transform .15s;}
-.shop-item:active{transform:scale(.93);}
-.shop-item .shop-icon{font-size:1.8rem;display:block;margin-bottom:4px;}
-.shop-item .shop-name{font-size:.7rem;font-weight:800;color:var(--text);margin-bottom:4px;}
-.shop-item .shop-cost{display:inline-flex;align-items:center;gap:3px;background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:20px;padding:2px 8px;font-size:.7rem;font-weight:900;color:var(--gold);}
-
-/* GAME HEADER */
-.game-header{padding:18px 20px 10px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10;background:linear-gradient(180deg,var(--bg) 80%,transparent);}
-.back-btn{background:var(--glass2);border:1px solid var(--border);border-radius:12px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;flex-shrink:0;transition:transform .15s;backdrop-filter:blur(10px);}
-.back-btn:active{transform:scale(.88);}
-.game-title-block{flex:1;}
-.game-title{font-family:'Fredoka One',cursive;font-size:1.25rem;background:linear-gradient(135deg,#a855f7,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.game-subtitle{font-size:.75rem;color:var(--text2);font-weight:700;}
-.game-progress-bar{margin:0 20px 16px;background:rgba(255,255,255,.08);border-radius:99px;height:6px;overflow:hidden;}
-.game-progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width .5s ease;}
-
-/* SHARED GAME UI */
-.game-area{padding:0 20px;}
-.round-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.round-badge{background:var(--glass2);border:1px solid var(--border);border-radius:8px;padding:4px 12px;font-size:.8rem;font-weight:800;backdrop-filter:blur(8px);}
-.streak-badge{display:flex;align-items:center;gap:4px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:4px 12px;font-size:.8rem;font-weight:800;color:var(--gold);}
-.timer-badge{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:4px 12px;font-size:.8rem;font-weight:800;color:#f87171;min-width:60px;text-align:center;transition:background .3s;}
-.timer-badge.urgent{background:rgba(239,68,68,.4);border-color:rgba(239,68,68,.8);animation:pulse .5s infinite alternate;}
-@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.05)}}
-.q-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:22px 18px;text-align:center;margin-bottom:14px;backdrop-filter:blur(12px);}
-.q-visual{font-size:3.5rem;line-height:1;margin-bottom:8px;}
-.q-text{font-size:1rem;font-weight:800;line-height:1.4;}
-.q-sub{font-size:.8rem;color:var(--text2);font-weight:600;margin-top:4px;}
-.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-.option-btn{background:var(--glass);border:2px solid var(--border);border-radius:var(--rs);padding:14px 10px;text-align:center;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;color:var(--text);transition:transform .15s,background .2s,border-color .2s;backdrop-filter:blur(8px);user-select:none;}
-.option-btn:active:not(.disabled){transform:scale(.94);}
-.option-btn.correct{background:rgba(16,185,129,.25);border-color:var(--green);box-shadow:0 0 20px rgba(16,185,129,.3);animation:correctPop .4s cubic-bezier(.34,1.56,.64,1);}
-.option-btn.wrong{background:rgba(239,68,68,.2);border-color:var(--red);animation:shake .4s ease;}
-.option-btn.disabled{cursor:default;pointer-events:none;}
-@keyframes correctPop{from{transform:scale(1)}50%{transform:scale(1.07)}to{transform:scale(1)}}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-.fact-card{background:rgba(124,58,237,.15);border:1px solid rgba(168,85,247,.3);border-radius:var(--rs);padding:12px 14px;margin-bottom:14px;display:none;animation:fadeIn .3s ease;}
-.fact-card.show{display:block;}
-.fact-label{font-size:.65rem;font-weight:900;color:var(--accent2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
-.fact-text{font-size:.8rem;color:var(--text);line-height:1.4;}
-
-/* RESULT SCREEN */
-.result-score-row{display:flex;justify-content:center;gap:16px;margin:16px 0;}
-.result-stat{background:var(--glass);border:1px solid var(--border);border-radius:var(--rs);padding:14px 18px;backdrop-filter:blur(10px);text-align:center;}
-.rs-val{font-family:'Fredoka One',cursive;font-size:1.8rem;background:linear-gradient(135deg,var(--accent2),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;}
-.rs-label{font-size:.7rem;color:var(--text2);font-weight:800;}
-.big-btn{display:block;width:100%;padding:16px;background:linear-gradient(135deg,var(--accent),var(--cyan));border:none;border-radius:var(--rs);color:white;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;margin-top:12px;box-shadow:0 6px 24px rgba(124,58,237,.4);transition:transform .15s;}
-.big-btn:active{transform:scale(.96);}
-.big-btn.secondary{background:var(--glass2);box-shadow:none;border:1px solid var(--border);margin-top:8px;}
-
-/* OVERLAYS */
-.xp-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(135deg,var(--accent),var(--cyan));border-radius:16px;padding:16px 28px;font-family:'Fredoka One',cursive;font-size:1.4rem;color:white;z-index:999;pointer-events:none;box-shadow:0 12px 40px rgba(124,58,237,.6);transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .5s;white-space:nowrap;}
-.xp-popup.show{transform:translate(-50%,-50%) scale(1);}
-.xp-popup.hide{opacity:0;transform:translate(-50%,-120%) scale(.8);}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);border-radius:30px;padding:10px 20px;font-size:.85rem;font-weight:800;opacity:0;pointer-events:none;transition:all .3s;z-index:998;backdrop-filter:blur(12px);white-space:nowrap;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.levelup-overlay{position:fixed;inset:0;z-index:100;background:rgba(13,13,26,.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s;}
-.levelup-overlay.show{opacity:1;pointer-events:all;}
-.levelup-box{background:var(--bg3);border:2px solid var(--accent2);border-radius:24px;padding:40px 32px;text-align:center;box-shadow:0 0 60px rgba(168,85,247,.5);animation:levelupPop .6s cubic-bezier(.34,1.56,.64,1);max-width:340px;width:90%;}
-@keyframes levelupPop{from{transform:scale(.4) rotate(-5deg)}to{transform:scale(1) rotate(0)}}
-
-/* AI LOADING SCREEN */
-#aiScreen{position:fixed;inset:0;z-index:200;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px;}
-#aiScreen.show{display:flex;}
-.ai-orb{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:3rem;animation:orbPulse 2s ease-in-out infinite;box-shadow:0 0 40px rgba(124,58,237,.5);}
-@keyframes orbPulse{0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(124,58,237,.5)}50%{transform:scale(1.1);box-shadow:0 0 70px rgba(124,58,237,.9)}}
-.ai-title{font-family:'Fredoka One',cursive;font-size:1.5rem;background:linear-gradient(135deg,#a855f7,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;}
-.ai-sub{font-size:.85rem;color:var(--text2);font-weight:700;text-align:center;line-height:1.5;}
-.ai-bar-wrap{width:260px;background:rgba(255,255,255,.1);border-radius:99px;height:8px;overflow:hidden;}
-.ai-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:99px;width:0%;transition:width .4s ease;}
-.ai-step{font-size:.75rem;color:var(--accent2);font-weight:800;text-align:center;min-height:20px;}
-.ai-err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);border-radius:var(--rs);padding:14px 18px;text-align:center;display:none;width:100%;}
-.ai-err.show{display:block;}
-.ai-err-title{font-weight:800;color:#f87171;margin-bottom:6px;}
-.ai-err-sub{font-size:.8rem;color:var(--text2);}
-.ai-retry{background:linear-gradient(135deg,var(--accent),var(--cyan));border:none;border-radius:10px;color:white;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:800;padding:10px 24px;cursor:pointer;margin-top:10px;}
-
-/* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(13,13,26,.9);border-top:1px solid var(--border);display:flex;backdrop-filter:blur(20px);z-index:20;}
-.nav-btn{flex:1;padding:12px 0 10px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;opacity:.5;transition:opacity .2s;}
-.nav-btn.active{opacity:1;}
-.nav-btn .nav-icon{font-size:1.4rem;}
-.nav-btn .nav-label{font-size:.6rem;font-weight:800;color:var(--text2);}
-.nav-btn.active .nav-label{color:var(--accent2);}
-
-/* WORD SCRAMBLE tiles */
-.scramble-tiles{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0 16px;}
-.s-tile{width:38px;height:44px;background:var(--glass2);border:2px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1.2rem;cursor:pointer;transition:all .2s;user-select:none;}
-.s-tile:active{transform:scale(.9);}
-.s-tile.used{opacity:.3;pointer-events:none;}
-.answer-slots{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;min-height:52px;}
-.a-slot{width:38px;height:44px;background:rgba(255,255,255,.04);border:2px dashed var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:1.2rem;cursor:pointer;transition:all .2s;}
-.a-slot.filled{background:rgba(168,85,247,.25);border-color:var(--accent2);border-style:solid;}
-.a-slot.correct{background:rgba(16,185,129,.3);border-color:var(--green);}
-.a-slot.wrong{background:rgba(239,68,68,.2);border-color:var(--red);animation:shake .3s ease;}
-.scr-btns{display:flex;gap:8px;justify-content:center;margin-bottom:10px;}
-.scr-btn{background:var(--glass2);border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text);transition:transform .15s;}
-.scr-btn:active{transform:scale(.92);}
-
-/* FACT OR FICTION */
-.fof-card{background:var(--glass);border:1px solid var(--border);border-radius:24px;padding:28px 20px;text-align:center;margin-bottom:14px;backdrop-filter:blur(12px);min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;transition:transform .3s,opacity .3s;}
-.fof-card.swipe-l{transform:translateX(-130%) rotate(-15deg);opacity:0;}
-.fof-card.swipe-r{transform:translateX(130%) rotate(15deg);opacity:0;}
-.fof-statement{font-size:1rem;font-weight:800;line-height:1.4;}
-.fof-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.fof-btn{padding:16px;border:none;border-radius:var(--rs);font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:transform .15s;}
-.fof-btn:active{transform:scale(.94);}
-.fof-true{background:linear-gradient(135deg,#10b981,#06b6d4);color:white;}
-.fof-false{background:linear-gradient(135deg,#ef4444,#ec4899);color:white;}
-.fof-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:2rem;border-radius:24px;opacity:0;transition:opacity .3s;}
-.fof-overlay.show{opacity:1;}
-
-/* MATH NINJA */
-.math-eq{font-family:'Fredoka One',cursive;font-size:2.4rem;background:linear-gradient(135deg,#ef4444,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:10px 0;}
-.math-lives{display:flex;gap:6px;justify-content:center;margin-bottom:10px;}
-.life{font-size:1.3rem;transition:all .3s;}
-.life.lost{filter:grayscale(1);transform:scale(.7);}
-
-/* TIMELINE (Time Machine) */
-.t-items{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
-.t-item{background:var(--glass2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;cursor:pointer;font-size:.82rem;font-weight:800;transition:all .2s;user-select:none;}
-.t-item:active{transform:scale(.97);}
-.t-item.placed{opacity:.4;pointer-events:none;}
-.t-slots{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
-.t-slot{background:rgba(255,255,255,.03);border:2px dashed var(--border);border-radius:var(--rs);padding:9px 14px;min-height:42px;display:flex;align-items:center;gap:8px;font-size:.78rem;transition:all .2s;}
-.t-slot.filled{border-style:solid;border-color:var(--accent2);background:rgba(124,58,237,.15);}
-.t-slot.ok{border-color:var(--green);background:rgba(16,185,129,.15);}
-.t-slot.bad{border-color:var(--red);background:rgba(239,68,68,.1);}
-.t-num{font-size:.7rem;color:var(--text2);font-weight:700;flex-shrink:0;}
-
-/* ECO */
-.eco-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-.eco-r{background:var(--glass2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 8px;text-align:center;}
-.eco-ri{font-size:1.5rem;}
-.eco-rv{font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--gold);}
-.eco-rl{font-size:.6rem;color:var(--text2);font-weight:800;}
-.eco-acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
-.eco-act{background:var(--glass);border:1px solid var(--border);border-radius:var(--rs);padding:12px 10px;text-align:center;cursor:pointer;transition:all .2s;user-select:none;}
-.eco-act:active{transform:scale(.94);}
-.eco-act.correct{background:rgba(16,185,129,.25);border-color:var(--green);}
-.eco-act.wrong{background:rgba(239,68,68,.2);border-color:var(--red);animation:shake .4s ease;}
-.eco-act.disabled{pointer-events:none;}
-.eco-ai{font-size:1.7rem;}
-.eco-an{font-size:.75rem;font-weight:800;margin-top:4px;}
-.eco-bar{margin-bottom:10px;}
-.eco-bl{font-size:.72rem;font-weight:800;color:var(--text2);margin-bottom:4px;}
-.eco-bg{background:rgba(255,255,255,.1);border-radius:99px;height:10px;overflow:hidden;}
-.eco-bf{height:100%;border-radius:99px;transition:width .5s ease;}
-
-/* LOGIC */
-.logic-seq{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin:12px 0;}
-.logic-cell{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:900;border:2px solid var(--border);background:var(--glass2);}
-.logic-cell.hl{border-color:var(--accent2);background:rgba(124,58,237,.3);animation:logicPulse 1s ease-in-out infinite;}
-@keyframes logicPulse{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,0)}50%{box-shadow:0 0 0 6px rgba(168,85,247,.3)}}
-
-/* FLAG */
-.flag-wrap{display:flex;justify-content:center;margin-bottom:12px;}
-.flag-wrap svg{width:180px;height:120px;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:flagIn .4s cubic-bezier(.34,1.56,.64,1);}
-@keyframes flagIn{from{transform:scale(.3) rotate(-10deg);opacity:0}to{transform:scale(1);opacity:1}}
-</style>
-</head>
-<body>
-<div class="stars" id="stars"></div>
-<div class="xp-popup" id="xpPop">+XP</div>
-<div class="toast" id="toast"></div>
-<div class="levelup-overlay" id="lvlOverlay">
-  <div class="levelup-box">
-    <div style="font-size:5rem">🏆</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:2rem;color:var(--gold);margin:8px 0">NÍVEL <span id="newLvl">2</span>!</div>
-    <div style="color:var(--text2);margin-bottom:20px;font-size:.9rem">Incrível! Continua a explorar!</div>
-    <button class="big-btn" id="lvlCloseBtn">Continuar 🚀</button>
-  </div>
-</div>
-
-<!-- AI LOADING SCREEN -->
-<div id="aiScreen">
-  <div class="ai-orb" id="aiOrb">🤖</div>
-  <div class="ai-title" id="aiTitle">A criar perguntas...</div>
-  <div class="ai-sub" id="aiSub">A IA está a gerar 10 perguntas únicas<br>adaptadas ao teu nível de jogo!</div>
-  <div class="ai-bar-wrap"><div class="ai-bar" id="aiBar"></div></div>
-  <div class="ai-step" id="aiStep">A iniciar...</div>
-  <div class="ai-err" id="aiErr">
-    <div class="ai-err-title">⚠️ Sem ligação à IA</div>
-    <div class="ai-err-sub" id="aiErrSub">A usar perguntas guardadas localmente</div>
-    <button class="ai-retry" id="aiRetry">Tentar novamente 🔄</button>
-  </div>
-</div>
-
-<div id="app">
-<!-- DASHBOARD -->
-<div id="dashboard" class="screen active">
-  <div class="header">
-    <div class="logo">EduQuest</div>
-    <div class="header-stats">
-      <div class="stat-pill">💎 <span id="gemCount">0</span></div>
-      <div class="stat-pill">⚡ <span id="xpCount">0</span></div>
-    </div>
-  </div>
-  <div class="xp-section">
-    <div class="xp-top">
-      <div class="level-badge">⭐ Nível <span id="levelNum">1</span></div>
-      <div class="xp-text"><span id="xpCur">0</span> / <span id="xpNext">100</span> XP</div>
-    </div>
-    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpFill" style="width:0%"></div></div>
-  </div>
-  <div class="section-title">🎯 Mini-Jogos</div>
-  <div class="game-grid" id="gameGrid"></div>
-  <div class="section-title">🏅 Conquistas</div>
-  <div class="achievements-row" id="achRow"></div>
-  <div class="section-title">🛒 Loja de Power-ups</div>
-  <div class="shop-row" id="shopRow"></div>
-</div>
-
-<!-- UNIVERSAL GAME SCREEN (used by all AI games) -->
-<div id="gameScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="gameBackBtn">←</div>
-    <div class="game-title-block">
-      <div class="game-title" id="gameTitle">Jogo</div>
-      <div class="game-subtitle">Q <span id="gameQNum">1</span>/10 · Nível <span id="gameLvlNum">1</span></div>
-    </div>
-    <div class="stat-pill">⚡ <span id="gameXP">0</span></div>
-  </div>
-  <div class="game-progress-bar"><div class="game-progress-fill" id="gameProgressFill" style="width:0%"></div></div>
-  <div class="game-area">
-    <div class="round-info">
-      <div class="round-badge" id="gameRoundBadge">Q 1</div>
-      <div class="streak-badge">🔥 <span id="gameStreak">0</span></div>
-      <div class="timer-badge" id="gameTimerBadge">⏱ <span id="gameTimer">20</span>s</div>
-    </div>
-    <div class="q-card">
-      <div class="q-visual" id="gameVisual">❓</div>
-      <div class="q-text" id="gameText">...</div>
-      <div class="q-sub" id="gameSub"></div>
-    </div>
-    <div class="options-grid" id="gameOptions"></div>
-    <div class="fact-card" id="gameFact"><div class="fact-label">💡 Sabias que...</div><div class="fact-text" id="gameFactText"></div></div>
-  </div>
-</div>
-
-<!-- WORD SCRAMBLE SCREEN -->
-<div id="wordScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="wordBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">🔤 Word Scramble</div><div class="game-subtitle">Palavra <span id="wordQNum">1</span>/8 · Nível <span id="wordLvlNum">1</span></div></div>
-    <div class="stat-pill">⚡ <span id="wordXP">0</span></div>
-  </div>
-  <div class="game-progress-bar"><div class="game-progress-fill" id="wordProgressFill" style="width:0%"></div></div>
-  <div class="game-area">
-    <div class="round-info">
-      <div class="round-badge">🔤 Descobre!</div>
-      <div class="streak-badge">🔥 <span id="wordStreak">0</span></div>
-      <div class="timer-badge" id="wordTimerBadge">⏱ <span id="wordTimer">35</span>s</div>
-    </div>
-    <div class="q-card"><div class="q-sub" id="wordHint"></div><div class="answer-slots" id="wordSlots"></div></div>
-    <div class="scramble-tiles" id="wordTiles"></div>
-    <div class="scr-btns">
-      <button class="scr-btn" id="wordClearBtn">🗑️ Limpar</button>
-      <button class="scr-btn" id="wordCheckBtn">✅ Verificar</button>
-    </div>
-    <div class="fact-card" id="wordFact"><div class="fact-label">💡 Sabias que...</div><div class="fact-text" id="wordFactText"></div></div>
-  </div>
-</div>
-
-<!-- FACT OR FICTION SCREEN -->
-<div id="fofScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="fofBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">🤔 Fact or Fiction</div><div class="game-subtitle">Q <span id="fofQNum">1</span>/10 · Nível <span id="fofLvlNum">1</span></div></div>
-    <div class="stat-pill">⚡ <span id="fofXP">0</span></div>
-  </div>
-  <div class="game-progress-bar"><div class="game-progress-fill" id="fofProgressFill" style="width:0%"></div></div>
-  <div class="game-area">
-    <div class="round-info">
-      <div class="round-badge">Q <span id="fofRound">1</span></div>
-      <div class="streak-badge">🔥 <span id="fofStreak">0</span></div>
-      <div class="timer-badge" id="fofTimerBadge">⏱ <span id="fofTimer">15</span>s</div>
-    </div>
-    <div class="fof-card" id="fofCard">
-      <div class="q-visual" id="fofVisual">🤔</div>
-      <div class="fof-statement" id="fofStatement">...</div>
-      <div class="fof-overlay" id="fofOverlay"></div>
-    </div>
-    <div class="fof-btns">
-      <button class="fof-btn fof-true" id="fofTrueBtn">✅ VERDADE</button>
-      <button class="fof-btn fof-false" id="fofFalseBtn">❌ FALSO</button>
-    </div>
-    <div class="fact-card" id="fofFact"><div class="fact-label">💡 Explicação</div><div class="fact-text" id="fofFactText"></div></div>
-  </div>
-</div>
-
-<!-- MATH NINJA SCREEN -->
-<div id="mathScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="mathBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">⚔️ Math Ninja</div><div class="game-subtitle">Q <span id="mathQNum">1</span>/10 · Nível <span id="mathLvlNum">1</span></div></div>
-    <div class="stat-pill">⚡ <span id="mathXP">0</span></div>
-  </div>
-  <div class="game-progress-bar"><div class="game-progress-fill" id="mathProgressFill" style="width:0%"></div></div>
-  <div class="game-area">
-    <div class="round-info">
-      <div class="math-lives" id="mathLives"></div>
-      <div class="streak-badge">🔥 <span id="mathStreak">0</span></div>
-      <div class="timer-badge" id="mathTimerBadge">⏱ <span id="mathTimer">12</span>s</div>
-    </div>
-    <div class="q-card" style="min-height:120px">
-      <div class="math-eq" id="mathEq">2 + 2 = ?</div>
-    </div>
-    <div class="options-grid" id="mathOptions"></div>
-    <div class="fact-card" id="mathFact"><div class="fact-label">💡 Dica</div><div class="fact-text" id="mathFactText"></div></div>
-  </div>
-</div>
-
-<!-- GEO FLAGS SCREEN -->
-<div id="geoScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="geoBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">🌍 Geo-Flags</div><div class="game-subtitle">Q <span id="geoQNum">1</span>/10</div></div>
-    <div class="stat-pill">⚡ <span id="geoXP">0</span></div>
-  </div>
-  <div class="game-progress-bar"><div class="game-progress-fill" id="geoProgressFill" style="width:0%"></div></div>
-  <div class="game-area">
-    <div class="round-info">
-      <div class="round-badge">Q <span id="geoRound">1</span></div>
-      <div class="streak-badge">🔥 <span id="geoStreak">0</span></div>
-      <div class="timer-badge" id="geoTimerBadge">⏱ <span id="geoTimer">15</span>s</div>
-    </div>
-    <div class="q-card">
-      <div class="flag-wrap" id="flagWrap"></div>
-      <div class="q-text">De que país é esta bandeira?</div>
-      <div class="q-sub" id="geoHint"></div>
-    </div>
-    <div class="options-grid" id="geoOptions"></div>
-    <div class="fact-card" id="geoFact"><div class="fact-label">💡 Facto</div><div class="fact-text" id="geoFactText"></div></div>
-  </div>
-</div>
-
-<!-- TIME MACHINE SCREEN -->
-<div id="timeScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="timeBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">⏳ Time Machine</div><div class="game-subtitle">Ronda <span id="timeQNum">1</span>/8 · Nível <span id="timeLvlNum">1</span></div></div>
-    <div class="stat-pill">⚡ <span id="timeXP">0</span></div>
-  </div>
-  <div class="game-progress-bar"><div class="game-progress-fill" id="timeProgressFill" style="width:0%"></div></div>
-  <div class="game-area">
-    <div class="round-info">
-      <div class="round-badge">⏳ Ordena!</div>
-      <div class="streak-badge">🔥 <span id="timeStreak">0</span></div>
-      <div class="timer-badge" id="timeTimerBadge">⏱ <span id="timeTimer">35</span>s</div>
-    </div>
-    <div style="font-size:.82rem;font-weight:700;color:var(--text2);text-align:center;margin-bottom:10px">Toca por ordem CRONOLÓGICA (mais antigo primeiro)</div>
-    <div class="t-slots" id="timeSlots"></div>
-    <div class="t-items" id="timeItems"></div>
-    <div class="fact-card" id="timeFact"><div class="fact-label">💡 História</div><div class="fact-text" id="timeFactText"></div></div>
-  </div>
-</div>
-
-<!-- ECO TYCOON SCREEN -->
-<div id="ecoScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="ecoBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">🌱 Eco-Tycoon</div><div class="game-subtitle">Nível <span id="ecoQNum">1</span>/8 · Dif. <span id="ecoLvlNum">1</span></div></div>
-    <div class="stat-pill">⚡ <span id="ecoXP">0</span></div>
-  </div>
-  <div class="game-progress-bar"><div class="game-progress-fill" id="ecoProgressFill" style="width:0%"></div></div>
-  <div class="game-area">
-    <div class="eco-res" id="ecoRes"></div>
-    <div style="font-size:.85rem;font-weight:800;text-align:center;margin-bottom:10px" id="ecoChallenge"></div>
-    <div class="eco-acts" id="ecoActs"></div>
-    <div class="eco-bar"><div class="eco-bl">🌍 Saúde do Planeta</div><div class="eco-bg"><div class="eco-bf" id="ecoHealth" style="width:60%;background:linear-gradient(90deg,#10b981,#06b6d4)"></div></div></div>
-    <div class="eco-bar"><div class="eco-bl">⚡ Energia</div><div class="eco-bg"><div class="eco-bf" id="ecoEnergy" style="width:50%;background:linear-gradient(90deg,#f59e0b,#f97316)"></div></div></div>
-    <div class="fact-card" id="ecoFact"><div class="fact-label">💡 Eco-Dica</div><div class="fact-text" id="ecoFactText"></div></div>
-  </div>
-</div>
-
-<!-- LOGIC MATRIX SCREEN -->
-<div id="logicScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="logicBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">🧩 Logic Matrix</div><div class="game-subtitle">Puzzle <span id="logicQNum">1</span>/10 · Nível <span id="logicLvlNum">1</span></div></div>
-    <div class="stat-pill">⚡ <span id="logicXP">0</span></div>
-  </div>
-  <div class="game-progress-bar"><div class="game-progress-fill" id="logicProgressFill" style="width:0%"></div></div>
-  <div class="game-area">
-    <div class="round-info">
-      <div class="round-badge">🧩 Sequência</div>
-      <div class="streak-badge">🔥 <span id="logicStreak">0</span></div>
-      <div class="timer-badge" id="logicTimerBadge">⏱ <span id="logicTimer">25</span>s</div>
-    </div>
-    <div class="q-card">
-      <div class="logic-seq" id="logicSeq"></div>
-      <div class="q-text">Qual o valor do <span style="color:var(--accent2)">?</span></div>
-    </div>
-    <div class="options-grid" id="logicOptions"></div>
-    <div class="fact-card" id="logicFact"><div class="fact-label">💡 Lógica</div><div class="fact-text" id="logicFactText"></div></div>
-  </div>
-</div>
-
-<!-- RESULT SCREEN -->
-<div id="resultScreen" class="screen">
-  <div class="game-header">
-    <div class="back-btn" id="resultBackBtn">←</div>
-    <div class="game-title-block"><div class="game-title">Resultado Final</div></div>
-  </div>
-  <div style="padding:0 20px;text-align:center">
-    <div style="padding:20px 0">
-      <div style="font-size:5rem" id="resultEmoji">🎉</div>
-      <div style="font-family:'Fredoka One',cursive;font-size:2rem;background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0" id="resultTitle">Excelente!</div>
-      <div style="color:var(--text2);font-size:.85rem" id="resultSub"></div>
-    </div>
-    <div class="result-score-row">
-      <div class="result-stat"><span class="rs-val" id="rsCorrect">0</span><span class="rs-label">Acertos</span></div>
-      <div class="result-stat"><span class="rs-val" id="rsXP">0</span><span class="rs-label">XP</span></div>
-      <div class="result-stat"><span class="rs-val" id="rsGems">0</span><span class="rs-label">💎</span></div>
-    </div>
-    <button class="big-btn" id="playAgainBtn">Jogar de Novo 🔄</button>
-    <button class="big-btn secondary" id="resultHomeBtn">Dashboard 🏠</button>
-  </div>
-</div>
-</div><!-- /app -->
-
-<div class="bottom-nav">
-  <div class="nav-btn active" id="navHome"><span class="nav-icon">🏠</span><span class="nav-label">Início</span></div>
-  <div class="nav-btn" id="navBadges"><span class="nav-icon">🏅</span><span class="nav-label">Medalhas</span></div>
-  <div class="nav-btn" id="navShop"><span class="nav-icon">🛒</span><span class="nav-label">Loja</span></div>
-  <div class="nav-btn" id="navStats"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></div>
-</div>
-<script>
 // EduQuest Questions Bank
 // Format: {v:"visual/emoji", t:"question text", o:["opt1","opt2","opt3","opt4"], c:"correct option", f:"fun fact", d:1-3}
 // d: 1=easy, 2=medium, 3=hard
@@ -1081,33 +591,295 @@ if(typeof module!=='undefined')module.exports=QB;
 // ================================================================
 // STATE ENGINE
 // ================================================================
-const XP_TABLE=[0,100,250,450,700,1000,1400,1900,2500,3200,4000];
-const DEF={xp:0,level:1,gems:20,totalCorrect:0,totalPlayed:0,achievements:{},powerups:{hint:2,skip:1,'2x':1},maxStreak:0,gamesPlayed:[]};
+// ── Global XP (gems, badges) ──
+const GLOBAL_XP=[0,200,500,1000,1800,3000]; // 5 global levels
+// ── Per-game XP to level up: 10 levels per game ──
+const GAME_XP=[0,60,120,200,300,420,560,720,900,1100]; // xp to reach each level
+
+const DEF={
+  gems:20, globalXP:0, globalLevel:1,
+  totalCorrect:0, totalPlayed:0,
+  achievements:{}, powerups:{hint:2,skip:1,'2x':1},
+  maxStreak:0, gamesPlayed:[],
+  // per-game progress: { gameId: {level:1, xp:0, seen:[]} }
+  gameProgress:{}
+};
 let state=loadState();
 let CG={}; // current game
 
-function loadState(){try{const s=localStorage.getItem('eq21');if(s)return Object.assign(JSON.parse(JSON.stringify(DEF)),JSON.parse(s));}catch(e){}return JSON.parse(JSON.stringify(DEF));}
+function loadState(){
+  try{const s=localStorage.getItem('eq21');if(s){const p=JSON.parse(s);return Object.assign(JSON.parse(JSON.stringify(DEF)),p);}}
+  catch(e){}
+  return JSON.parse(JSON.stringify(DEF));
+}
 function saveState(){try{localStorage.setItem('eq21',JSON.stringify(state));}catch(e){}}
-function xpNeed(l){return XP_TABLE[Math.min(l,10)]||(l*500);}
-function addXP(n){state.xp+=n;if(state.xp>=xpNeed(state.level)&&state.level<10){state.xp-=xpNeed(state.level);state.level++;showLevelUp(state.level);}saveState();updateHUD();}
+
+// ── Per-game progress helpers ──
+function getGameProg(id){
+  if(!state.gameProgress[id])state.gameProgress[id]={level:1,xp:0,seen:[]};
+  return state.gameProgress[id];
+}
+function gameXPNeed(lvl){return GAME_XP[Math.min(lvl-1,GAME_XP.length-1)];}
+function addGameXP(id, n){
+  const p=getGameProg(id);
+  p.xp+=n;
+  let leveled=false;
+  while(p.level<10 && p.xp>=gameXPNeed(p.level)){
+    p.xp-=gameXPNeed(p.level);
+    p.level++;
+    leveled=true;
+  }
+  if(leveled){showGameLevelUp(id, p.level);if(p.level===10)launchConfetti();}
+  saveState();
+  return p.level;
+}
+function showGameLevelUp(id, lvl){
+  const gm=GAMES.find(g=>g.id===id);
+  showToast((gm?gm.emoji:'⭐')+' '+(gm?gm.name:id)+' → Nível '+lvl+'! 🎉');
+  vibrate([30,20,30,20,60]);playSound('levelup');
+}
+
+// ── Global XP (gems only - cosmetic) ──
+function globalXPNeed(l){return GLOBAL_XP[Math.min(l,5)]||(l*600);}
+function addGlobalXP(n){
+  state.globalXP=(state.globalXP||0)+n;
+  if(state.globalLevel<5 && state.globalXP>=globalXPNeed(state.globalLevel)){
+    state.globalXP-=globalXPNeed(state.globalLevel);
+    state.globalLevel=(state.globalLevel||1)+1;
+    showLevelUp(state.globalLevel);
+  }
+  saveState(); updateHUD();
+}
 function addGems(n){state.gems+=n;saveState();updateHUD();}
 function updateHUD(){
-  ['gemCount','xpCount'].forEach((id,i)=>document.getElementById(id).textContent=[state.gems,state.xp][i]);
-  document.getElementById('levelNum').textContent=state.level;
-  document.getElementById('xpCur').textContent=state.xp;
-  document.getElementById('xpNext').textContent=xpNeed(state.level);
-  document.getElementById('xpFill').style.width=Math.min(100,state.xp/xpNeed(state.level)*100)+'%';
+  document.getElementById('gemCount').textContent=state.gems;
+  document.getElementById('xpCount').textContent=state.globalXP||0;
+  document.getElementById('levelNum').textContent=state.globalLevel||1;
+  document.getElementById('xpCur').textContent=state.globalXP||0;
+  document.getElementById('xpNext').textContent=globalXPNeed(state.globalLevel||1);
+  document.getElementById('xpFill').style.width=Math.min(100,((state.globalXP||0)/globalXPNeed(state.globalLevel||1))*100)+'%';
 }
 function shuffle(a){const b=a.slice();for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function showXP(t){const el=document.getElementById('xpPop');el.textContent=t;el.classList.remove('show','hide');void el.offsetWidth;el.classList.add('show');setTimeout(()=>{el.classList.remove('show');el.classList.add('hide');},1400);}
 function showToast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2400);}
-function showLevelUp(l){document.getElementById('newLvl').textContent=l;document.getElementById('lvlOverlay').classList.add('show');vibrate([50,30,50,30,100]);snd('correct');}
+function showLevelUp(l){document.getElementById('newLvl').textContent=l;document.getElementById('lvlOverlay').classList.add('show');vibrate([50,30,50,30,100]);playSound('levelup');launchConfetti(80);}
 function vibrate(p){try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}}
-let _ctx=null;
-function snd(t){try{if(!_ctx)_ctx=new(window.AudioContext||window.webkitAudioContext)();const o=_ctx.createOscillator(),g=_ctx.createGain();o.connect(g);g.connect(_ctx.destination);if(t==='correct'){o.type='sine';o.frequency.setValueAtTime(523,_ctx.currentTime);o.frequency.setValueAtTime(784,_ctx.currentTime+.15);g.gain.setValueAtTime(.3,_ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,_ctx.currentTime+.4);o.start();o.stop(_ctx.currentTime+.4);}else{o.type='square';o.frequency.setValueAtTime(200,_ctx.currentTime);o.frequency.setValueAtTime(140,_ctx.currentTime+.1);g.gain.setValueAtTime(.2,_ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,_ctx.currentTime+.3);o.start();o.stop(_ctx.currentTime+.3);}}catch(e){}}
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');if(id==='dashboard'){buildAch();buildShop();updateHUD();}}
-function goBack(){clearInterval(CG.timer);showScreen('dashboard');}
+// ================================================================
+// AUDIO ENGINE
+// ================================================================
+let _ctx=null, _muted=false;
+function getCtx(){if(!_ctx)_ctx=new(window.AudioContext||window.webkitAudioContext)();return _ctx;}
+function playSound(type){
+  if(_muted)return;
+  try{
+    const ctx=getCtx();
+    const now=ctx.currentTime;
+    const master=ctx.createGain();master.connect(ctx.destination);
+    if(type==='success'||type==='correct'){
+      // Ascending two-tone chime
+      [523,784].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(0,now+i*.12);
+        g.gain.linearRampToValueAtTime(.28,now+i*.12+.04);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.12+.35);
+        o.connect(g);g.connect(master);o.start(now+i*.12);o.stop(now+i*.12+.35);
+      });
+    }else if(type==='error'||type==='wrong'){
+      // Low buzzing error
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sawtooth';o.frequency.setValueAtTime(220,now);
+      o.frequency.exponentialRampToValueAtTime(110,now+.25);
+      g.gain.setValueAtTime(.22,now);g.gain.exponentialRampToValueAtTime(.001,now+.28);
+      o.connect(g);g.connect(master);o.start(now);o.stop(now+.28);
+    }else if(type==='click'){
+      // Short pop
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';o.frequency.value=600;
+      g.gain.setValueAtTime(.18,now);g.gain.exponentialRampToValueAtTime(.001,now+.08);
+      o.connect(g);g.connect(master);o.start(now);o.stop(now+.08);
+    }else if(type==='levelup'){
+      // Festive arpeggio C-E-G-C
+      [523,659,784,1047].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='triangle';o.frequency.value=f;
+        g.gain.setValueAtTime(0,now+i*.1);
+        g.gain.linearRampToValueAtTime(.3,now+i*.1+.05);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.1+.3);
+        o.connect(g);g.connect(master);o.start(now+i*.1);o.stop(now+i*.1+.3);
+      });
+    }else if(type==='confetti'){
+      // Quick fanfare
+      [659,784,1047,1319].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(.25,now+i*.08);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.08+.2);
+        o.connect(g);g.connect(master);o.start(now+i*.08);o.stop(now+i*.08+.2);
+      });
+    }
+  }catch(e){}
+}
+// Legacy alias
+function snd(t){playSound(t==='correct'?'success':t==='wrong'?'error':t);}
+
+// ================================================================
+// CONFETTI ENGINE
+// ================================================================
+let confettiParts=[];
+const CONF_COLORS=['#f59e0b','#ef4444','#10b981','#3b82f6','#a855f7','#ec4899','#06b6d4','#84cc16'];
+function launchConfetti(n=80){
+  const cv=document.getElementById('confettiCanvas');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  for(let i=0;i<n;i++){
+    confettiParts.push({
+      x:Math.random()*cv.width,y:-10,
+      vx:(Math.random()-0.5)*6,vy:Math.random()*4+2,
+      w:rnd(6,14),h:rnd(4,8),
+      color:CONF_COLORS[i%CONF_COLORS.length],
+      rot:Math.random()*360,rv:(Math.random()-0.5)*8,
+      life:1
+    });
+  }
+  playSound('confetti');
+  if(!confettiParts._anim) animConfetti();
+}
+function animConfetti(){
+  const cv=document.getElementById('confettiCanvas');
+  const ctx2=cv.getContext('2d');
+  ctx2.clearRect(0,0,cv.width,cv.height);
+  confettiParts=confettiParts.filter(p=>{
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.rot+=p.rv;p.life-=0.012;
+    if(p.life<=0||p.y>cv.height+20)return false;
+    ctx2.save();ctx2.translate(p.x,p.y);ctx2.rotate(p.rot*Math.PI/180);
+    ctx2.globalAlpha=p.life;ctx2.fillStyle=p.color;
+    ctx2.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+    ctx2.restore();return true;
+  });
+  if(confettiParts.length>0)requestAnimationFrame(animConfetti);
+  else ctx2.clearRect(0,0,cv.width,cv.height);
+}
+
+// ================================================================
+// SCREEN SHAKE
+// ================================================================
+function shakeScreen(){
+  const el=document.querySelector('.screen.active .q-card')||document.querySelector('.screen.active');
+  if(!el)return;
+  el.classList.remove('shake');void el.offsetWidth;
+  el.classList.add('shake');
+  setTimeout(()=>el.classList.remove('shake'),400);
+}
+
+// ================================================================
+// EDU GUIDE
+// ================================================================
+const EDU_PHRASES=[
+  'Estás a ir muito bem! Continua! 💪',
+  'Sabias que as abelhas sabem contar até 5? 🐝',
+  'Cada pergunta certa traz-te mais perto do nível seguinte! ⭐',
+  'Dica: usa o Escudo quando tiveres streak alta! 🛡️',
+  'A Lua demora 27 dias a orbitar a Terra! 🌙',
+  'Consegues chegar ao nível 10 em todos os jogos? 🏆',
+  'Mais 3 acertos seguidos e ganhas Gems extra! 💎',
+  'O teu cérebro tem 86 mil milhões de neurónios! 🧠',
+  'Usa a Dica quando não tiveres a certeza! 🔍',
+  'O português é falado por 260 milhões de pessoas! 🇵🇹',
+  'Experimenta o Math Ninja — é o mais difícil! ⚔️',
+  'A borboleta Monarca migra 4.500 km por ano! 🦋',
+  'Freeze o tempo nos últimos segundos! ❄️',
+  'Cada jogo tem 10 níveis para desbloquear! 🎮',
+  'A Torre Eiffel cresce 15 cm no verão! 🗼',
+];
+let _eduIdx=0;
+function updateEdu(){
+  const phrases=[...EDU_PHRASES];
+  // Add dynamic phrases based on state
+  GAMES.forEach(g=>{const p=getGameProg(g.id);if(p.level>=5)phrases.push(g.emoji+' '+g.name+' nível '+p.level+'! Impressionante! 🔥');});
+  const best=GAMES.reduce((a,b)=>getGameProg(a.id).level>getGameProg(b.id).level?a:b,GAMES[0]);
+  phrases.push('O teu melhor jogo é '+best.emoji+' '+best.name+'! Nível '+getGameProg(best.id).level+'! ⭐');
+  const el=document.getElementById('eduText');
+  if(el)el.textContent=phrases[Math.floor(Math.random()*phrases.length)];
+}
+
+// ================================================================
+// POWER-UPS (in-game)
+// ================================================================
+// state.powerups keys: hint, shield, freeze (replacing old 2x)
+function updatePowerupBar(){
+  const pu=state.powerups||{};
+  const h=pu.hint||0,s=pu.shield||0,f=pu.freeze||0;
+  const hb=document.getElementById('puHintBtn');
+  const sb=document.getElementById('puShieldBtn');
+  const fb=document.getElementById('puFreezeBtn');
+  const bar=document.getElementById('gamePowerupBar');
+  if(!bar)return;
+  bar.style.display=(h+s+f>0)?'flex':'none';
+  if(hb){document.getElementById('puHintCount').textContent=h;hb.disabled=(h<=0||CG.answered||CG.hintUsed);}
+  if(sb){document.getElementById('puShieldCount').textContent=s;sb.disabled=(s<=0||CG.shieldActive);sb.classList.toggle('active-shield',!!CG.shieldActive);}
+  if(fb){document.getElementById('puFreezeCount').textContent=f;fb.disabled=(f<=0||CG.freezeActive);fb.classList.toggle('active-freeze',!!CG.freezeActive);}
+}
+
+function usePowerup(type){
+  playSound('click');
+  if(type==='hint'){
+    if((state.powerups.hint||0)<=0||CG.answered||CG.hintUsed)return;
+    state.powerups.hint--;CG.hintUsed=true;
+    // Remove one wrong option from current game screen
+    const opts=document.querySelectorAll('#gameOptions .option-btn:not(.correct):not(.disabled)');
+    const wrong=[...opts].filter(b=>b.textContent!==(CG.questions[CG.qIndex]?.c||CG.questions[CG.qIndex]?.correct));
+    if(wrong.length>0){wrong[0].style.opacity='.2';wrong[0].disabled=true;}
+    showToast('🔍 Uma opção errada removida!');
+    saveState();updatePowerupBar();
+  }else if(type==='shield'){
+    if((state.powerups.shield||0)<=0||CG.shieldActive)return;
+    state.powerups.shield--;CG.shieldActive=true;
+    showToast('🛡️ Escudo ativo! Podes errar uma vez sem perder streak!');
+    saveState();updatePowerupBar();
+  }else if(type==='freeze'){
+    if((state.powerups.freeze||0)<=0||CG.freezeActive)return;
+    state.powerups.freeze--;CG.freezeActive=true;
+    // Pause timer for 10s
+    clearInterval(CG.timer);
+    const tb=document.getElementById('gameTimerBadge');
+    if(tb)tb.classList.add('frozen');
+    showToast('❄️ Tempo congelado por 10 segundos!');
+    saveState();updatePowerupBar();
+    setTimeout(()=>{
+      CG.freezeActive=false;
+      if(tb)tb.classList.remove('frozen');
+      // Restart timer from where it was
+      CG.timer=setInterval(()=>{
+        CG.timeLeft--;
+        const tEl=document.getElementById('gameTimer');
+        if(tEl)tEl.textContent=CG.timeLeft;
+        const tb2=document.getElementById('gameTimerBadge');
+        if(CG.timeLeft<=5&&tb2)tb2.classList.add('urgent');
+        if(CG.timeLeft<=0){
+          clearInterval(CG.timer);
+          if(!CG.answered){
+            CG.answered=true;CG.streak=0;state.totalPlayed++;saveState();
+            const q=CG.questions[CG.qIndex];
+            document.querySelectorAll('#gameOptions .option-btn').forEach(b=>{b.classList.add('disabled');if(b.textContent===(q?.c||q?.correct))b.classList.add('correct');});
+            const f=q?.f||q?.fact;if(f){document.getElementById('gameFactText').textContent=f;document.getElementById('gameFact').classList.add('show');}
+            playSound('error');vibrate([100]);
+            setTimeout(()=>{CG.qIndex++;renderAIQ();},4500);
+          }
+        }
+      },1000);
+      updatePowerupBar();
+    },10000);
+  }
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='dashboard'){buildAch();buildShop();updateHUD();updateEdu();}
+  if(id==='gameScreen')setTimeout(updatePowerupBar,50);
+}
+function goBack(){playSound('click');clearInterval(CG.timer);showScreen('dashboard');}
 
 // ================================================================
 // GAMES CATALOGUE
@@ -1150,8 +922,14 @@ const ACHS=[
 function buildGameGrid(){
   const g=document.getElementById('gameGrid');g.innerHTML='';
   GAMES.forEach((gm,i)=>{
+    const prog=getGameProg(gm.id);
+    const lvl=prog.level||1;
+    const xpCur=prog.xp||0;
+    const xpMax=lvl<10?gameXPNeed(lvl):1;
+    const pct=lvl<10?Math.min(100,xpCur/xpMax*100):100;
+    const barFilled=Math.round(lvl/10*5);const stars='▰'.repeat(barFilled)+'▱'.repeat(5-barFilled);
     const c=document.createElement('div');c.className='game-card';
-    c.innerHTML=`<span class="game-card-num">#${String(i+1).padStart(2,'0')}</span>${gm.ai?'<span class="ai-badge">IA ∞</span>':''}<span class="game-card-emoji">${gm.emoji}</span><div class="game-card-name">${gm.name}</div><div class="glow" style="background:radial-gradient(circle at 50% 50%,${gm.color}30,transparent 70%)"></div>`;
+    c.innerHTML=`<span class="game-card-num">#${String(i+1).padStart(2,'0')}</span><span class="game-card-emoji">${gm.emoji}</span><div class="game-card-name">${gm.name}</div><div class="game-card-lvl">${stars} Nv.${lvl}</div><div class="game-card-progress"><div class="game-card-progress-fill" style="width:${pct}%;background:${gm.color}"></div></div><div class="glow" style="background:radial-gradient(circle at 50% 50%,${gm.color}30,transparent 70%)"></div>`;
     c.style.borderColor=gm.color+'55';
     c.addEventListener('click',()=>launchGame(gm.id));
     g.appendChild(c);
@@ -1168,12 +946,25 @@ function buildAch(){
   });
 }
 function buildShop(){
-  const items=[{id:'hint',icon:'🔍',name:'Dica',cost:5},{id:'skip',icon:'⏭️',name:'Saltar',cost:8},{id:'2x',icon:'✨',name:'2×XP',cost:10}];
+  const items=[
+    {id:'hint',  icon:'🔍',name:'Dica Extra',  desc:'Remove uma opção errada',cost:5},
+    {id:'shield',icon:'🛡️',name:'Escudo',       desc:'Protege a streak 1x',    cost:8},
+    {id:'freeze',icon:'❄️',name:'Congelar Tempo',desc:'Pausa 10 segundos',     cost:10},
+  ];
   const r=document.getElementById('shopRow');r.innerHTML='';
   items.forEach(it=>{
+    const owned=state.powerups[it.id]||0;
     const d=document.createElement('div');d.className='shop-item';
-    d.innerHTML=`<span class="shop-icon">${it.icon}</span><div class="shop-name">${it.name}</div><span class="shop-cost">💎${it.cost}</span>`;
-    d.addEventListener('click',()=>{if(state.gems<it.cost){showToast('💎 Gems insuficientes!');return;}state.gems-=it.cost;state.powerups[it.id]=(state.powerups[it.id]||0)+1;saveState();updateHUD();showToast(it.icon+' '+it.name+' comprado!');});
+    d.innerHTML=`<span class="shop-icon">${it.icon}</span><div class="shop-name">${it.name}</div><div style="font-size:.6rem;color:var(--text2);margin-bottom:4px">${it.desc}</div><span class="shop-cost">💎${it.cost}</span><div class="shop-owned">Tens: ${owned}</div>`;
+    d.addEventListener('click',()=>{
+      playSound('click');
+      if(state.gems<it.cost){showToast('💎 Gems insuficientes!');return;}
+      state.gems-=it.cost;
+      state.powerups[it.id]=(state.powerups[it.id]||0)+1;
+      saveState();updateHUD();
+      showToast(it.icon+' '+it.name+' comprado! (tens '+state.powerups[it.id]+')');
+      buildShop(); // refresh counts
+    });
     r.appendChild(d);
   });
 }
@@ -1191,22 +982,40 @@ function scoreAnswer(ok){
     CG.xpEarned+=xp;
     const gems=CG.streak>=3?2:0;CG.gemsEarned+=gems;
     showXP('+'+xp+'XP'+(CG.streak>=3?' 🔥':'')+(gems?' +'+gems+'💎':''));
-    vibrate([15,0,15,0,30]);snd('correct');
-  }else{CG.streak=0;vibrate([80]);snd('wrong');}
-  saveState();
+    vibrate([15,0,15,0,30]);playSound('success');
+    // Confetti on streak ≥5 or hard question
+    if(CG.streak>=5||(CG.questions[CG.qIndex]&&(CG.questions[CG.qIndex].d===3||(CG.questions[CG.qIndex].d||1)===3)))launchConfetti(40);
+  }else{
+    // Shield absorbs one error
+    if(CG.shieldActive){
+      CG.shieldActive=false;
+      showToast('🛡️ Escudo ativado! Streak protegida!');
+      playSound('click');
+    }else{
+      CG.streak=0;vibrate([100]);playSound('error');shakeScreen();
+    }
+  }
+  saveState();updatePowerupBar();
 }
 function showResult(){
   clearInterval(CG.timer);
-  addXP(CG.xpEarned);addGems(CG.gemsEarned);
+  // Add game-specific XP → may level up that game
+  const newGameLvl = addGameXP(CG.id, CG.xpEarned);
+  // Add global XP (gems/badges)
+  addGlobalXP(CG.xpEarned);
+  addGems(CG.gemsEarned);
   if(CG.maxStreak>(state.maxStreak||0))state.maxStreak=CG.maxStreak;
   const k=CG.id+'Wins';if(CG.correct>=Math.floor(CG.total*.7)){state[k]=(state[k]||0)+1;}
-  saveState();buildAch();
+  saveState();buildAch();buildGameGrid();
   const pct=CG.correct/CG.total;
+  if(pct>=.7)launchConfetti(pct>=.9?120:60);
   let emoji='💪',title='Não desistas!';
   if(pct>=.9){emoji='🏆';title='PERFEITO!';}else if(pct>=.7){emoji='🎉';title='Excelente!';}else if(pct>=.5){emoji='👍';title='Muito Bem!';}else if(pct>=.3){emoji='😊';title='Bom trabalho!';}
   document.getElementById('resultEmoji').textContent=emoji;
   document.getElementById('resultTitle').textContent=title;
-  document.getElementById('resultSub').textContent=CG.correct+'/'+CG.total+' respostas certas · '+CG.xpEarned+' XP ganhos';
+  const prog=getGameProg(CG.id);
+  const xpBar = prog.level<10 ? ' · '+prog.xp+'/'+gameXPNeed(prog.level)+' XP p/ nível '+(prog.level+1) : ' · Nível Máximo! 🏆';
+  document.getElementById('resultSub').textContent=CG.correct+'/'+CG.total+' certas · Nível '+prog.level+xpBar;
   document.getElementById('rsCorrect').textContent=CG.correct;
   document.getElementById('rsXP').textContent=CG.xpEarned;
   document.getElementById('rsGems').textContent=CG.gemsEarned;
@@ -1215,40 +1024,66 @@ function showResult(){
 function playAgain(){if(CG.id)launchGame(CG.id);}
 
 // ================================================================
-// QUESTION BANK SYSTEM
+// QUESTION BANK SYSTEM — per-game levels, no repeats per level
 // ================================================================
-function getDifficulty(){
-  const l=state.level;
-  if(l<=2)return 1; // easy only
-  if(l<=4)return rnd(0,1)===0?1:2; // mostly easy, some medium
-  if(l<=6)return rnd(0,2)===0?1:2; // mix easy/medium
-  if(l<=8)return rnd(0,1)===0?2:3; // mostly medium, some hard
-  return rnd(0,2)===0?2:3; // mostly hard
+
+// Difficulty tiers by game level:
+// Game level 1 → only d:1
+// Game level 2 → only d:1 (different pool — seen[] prevents repeats)
+// Game level 3 → only d:2
+// Game level 4 → only d:2 (new pool)
+// Game level 5 → only d:3
+function getDiffForGameLevel(lvl){
+  if(lvl<=2) return 1;  // easy
+  if(lvl<=6) return 2;  // medium (4 levels to exhaust medium pool)
+  return 3;              // hard
 }
 
-// Get N random questions from QB for a game, filtered by difficulty
 function pickQuestions(gameId, n){
   const bank = QB && QB[gameId];
   if(!bank || bank.length===0) return null;
-  const diff = getDifficulty();
-  // Build weighted pool: include current diff + neighbors
-  const pool = [];
-  bank.forEach(q=>{
-    if(q.d === diff) { pool.push(q); pool.push(q); } // double weight for target diff
-    else if(Math.abs(q.d - diff) === 1) pool.push(q); // neighbor diff once
+
+  const prog = getGameProg(gameId);
+  const diff = getDiffForGameLevel(prog.level);
+
+  // Pool = all questions of the right difficulty
+  let pool = bank.filter(q => q.d === diff);
+  if(pool.length < 4) pool = bank.slice(); // safety fallback
+
+  // Remove already-seen questions (reset when pool exhausted)
+  const seen = prog.seen || [];
+  let unseen = pool.filter(q => !seen.includes(q.t||q.text));
+  if(unseen.length < n){
+    // Pool exhausted for this difficulty — reset seen for this diff
+    prog.seen = (prog.seen||[]).filter(t => {
+      const q = bank.find(b=>(b.t||b.text)===t);
+      return q && q.d !== diff; // keep seen from other diffs
+    });
+    unseen = pool.slice();
+    saveState();
+  }
+
+  const picked = shuffle(unseen).slice(0, n);
+  // Mark as seen
+  picked.forEach(q => {
+    const key = q.t||q.text;
+    if(!(prog.seen||[]).includes(key)){
+      if(!prog.seen) prog.seen=[];
+      prog.seen.push(key);
+    }
   });
-  if(pool.length < n) bank.forEach(q=>pool.push(q)); // fallback: add all
-  return shuffle(pool).filter((q,i,a)=>a.indexOf(q)===i).slice(0,n); // dedup + slice
+  saveState();
+  return picked;
 }
 
-// Show loading spinner while preparing questions
-function showQLoading(title, diff, onReady){
+function showQLoading(title, gameLvl, onReady){
   const scr=document.getElementById('aiScreen');
   scr.classList.add('show');
   document.getElementById('aiErr').classList.remove('show');
   document.getElementById('aiOrb').textContent='🎲';
   document.getElementById('aiTitle').textContent=title;
-  document.getElementById('aiSub').textContent='A selecionar perguntas de nível '+diff+'/3 para ti!';
+  const diffLabel=['','Iniciante','Iniciante','Intermédio','Intermédio','Avançado'][gameLvl]||'';
+  document.getElementById('aiSub').textContent='Nível '+gameLvl+' · '+diffLabel+' · A selecionar perguntas novas!';
   document.getElementById('aiBar').style.width='0%';
   document.getElementById('aiStep').textContent='A escolher...';
   let p=0;
@@ -1265,6 +1100,7 @@ function showQLoading(title, diff, onReady){
 // LAUNCH DISPATCHER
 // ================================================================
 function launchGame(id){
+  playSound('click');
   if(!state.gamesPlayed.includes(id))state.gamesPlayed.push(id);
   saveState();
   const map={
@@ -1289,19 +1125,19 @@ function launchGame(id){
 }
 
 // ================================================================
-// GENERIC QUIZ ENGINE (QB-powered)
+// GENERIC QUIZ ENGINE (QB-powered, per-game levels)
 // ================================================================
 function startAIGame(id, title, timeLimit, xpPerQ){
-  const diff = getDifficulty();
-  showQLoading(title, diff, ()=>{
+  const prog = getGameProg(id);
+  showQLoading(title, prog.level, ()=>{
     const questions = pickQuestions(id, 10);
     if(!questions || questions.length < 4){
       showToast('⚠️ Banco de perguntas não encontrado para: '+id);
       goBack(); return;
     }
-    CG={id,title,total:Math.min(10,questions.length),correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,difficulty:diff,questions};
+    CG={id,title,total:Math.min(10,questions.length),correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,gameLvl:prog.level,questions,hintUsed:false,shieldActive:false,freezeActive:false};
     document.getElementById('gameTitle').textContent=title;
-    document.getElementById('gameLvlNum').textContent=diff;
+    document.getElementById('gameLvlNum').textContent=prog.level;
     showScreen('gameScreen');
     renderAIQ();
   });
@@ -1316,7 +1152,9 @@ function renderAIQ(){
   document.getElementById('gameStreak').textContent=CG.streak;
   document.getElementById('gameXP').textContent=CG.xpEarned;
   document.getElementById('gameProgressFill').style.width=((CG.qIndex/CG.total)*100)+'%';
-  document.getElementById('gameTimerBadge').classList.remove('urgent');
+  document.getElementById('gameTimerBadge').classList.remove('urgent','frozen');
+  CG.hintUsed=false;
+  updatePowerupBar();
   document.getElementById('gameVisual').textContent=q.v||q.visual||'❓';
   document.getElementById('gameText').textContent=q.t||q.text;
   document.getElementById('gameSub').textContent=q.sub||'';
@@ -1512,11 +1350,12 @@ function renderGeo(){
 function startMath(){
   CG={id:'math',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:25,timeLimit:12,timeLeft:12,timer:null,answered:false,qIndex:0,lives:3};
   showScreen('mathScreen');
-  document.getElementById('mathLvlNum').textContent=state.level;
+  const _mathProg=getGameProg('math');
+  document.getElementById('mathLvlNum').textContent=_mathProg.level;
   renderMath();
 }
 function genMathQ(){
-  const lvl=state.level;
+  const lvl=getGameProg('math').level*2+1; // scale math difficulty by game level
   const types=lvl<=2?['add','sub']:lvl<=4?['add','sub','mul']:lvl<=6?['sub','mul','div','sq']:['mul','div','sq','comb','perc'];
   const t=types[rnd(0,types.length-1)];
   let eq,ans;
@@ -1660,8 +1499,8 @@ function startWord(){
 }
 // Reuse code prompt but parse as word questions
 function startWordWithAI(){
-  const diff=getDifficulty();
-  showQLoading('🔤 Word Scramble', diff, ()=>startWordFallback(diff));
+  const _p=getGameProg('word');
+  showQLoading('🔤 Word Scramble', _p.level, ()=>startWordFallback(_p.level));
 }
 const WORD_FALLBACK=[
   {word:'FOTOSSÍNTESE',hint:'Processo das plantas para obter energia ☀️',fact:'Converte CO₂ + luz + água em glucose e oxigénio!'},
@@ -1720,8 +1559,8 @@ function wordResolve(ok,q){
 // FACT OR FICTION (AI-powered)
 // ================================================================
 function startFact(){
-  const diff=getDifficulty();
-  showQLoading('🤔 Fact or Fiction', diff, ()=>startFoFFallback(diff));
+  const _p=getGameProg('fact');
+  showQLoading('🤔 Fact or Fiction', _p.level, ()=>startFoFFallback(_p.level));
 }
 const FOF_FALLBACK=[
   {visual:'🧠',text:'Os humanos usam apenas 10% do cérebro.',correct:'Falso',fact:'Usamos praticamente 100% — diferentes áreas são ativas em diferentes momentos!'},
@@ -1783,8 +1622,8 @@ function fofAnswer(choice){
 // TIME MACHINE & ECO-TYCOON (AI-powered)
 // ================================================================
 function startTime(){
-  const diff=getDifficulty();
-  showQLoading('⏳ Time Machine', diff, ()=>startTimeFallback(diff));
+  const _p=getGameProg('time');
+  showQLoading('⏳ Time Machine', _p.level, ()=>startTimeFallback(_p.level));
 }
 // generateAIQWithPrompt removed - using QB bank
 
@@ -1850,8 +1689,8 @@ function startTimeFallback(diff){
 
 // ECO-TYCOON AI
 function startEco(){
-  const diff=getDifficulty();
-  showQLoading('🌱 Eco-Tycoon', diff, ()=>startEcoFallback(diff));
+  const _p=getGameProg('eco');
+  showQLoading('🌱 Eco-Tycoon', _p.level, ()=>startEcoFallback(_p.level));
 }
 const ECO_FALLBACK=[
   {challenge:'⚠️ Fábrica a poluir o rio! Qual a melhor solução?',actions:[{icon:'♻️',name:'Filtros anti-poluição',correct:true,feedback:'Filtros modernos reduzem 95% da poluição!'},{icon:'🚫',name:'Ignorar',correct:false,feedback:'Ignorar causa danos irreversíveis!'},{icon:'📋',name:'Apenas multar',correct:false,feedback:'A multa é fraca — a fábrica continua a poluir!'},{icon:'🌊',name:'Redirecionar para o mar',correct:false,feedback:'Ainda piora o problema!'}],fact:'Os filtros industriais modernos podem remover 99% dos poluentes da água!'},
@@ -1903,7 +1742,18 @@ function startWord(){startWordWithAI();}
 // ================================================================
 // INIT
 // ================================================================
-createStars();buildGameGrid();buildAch();buildShop();updateHUD();
+createStars();buildGameGrid();buildAch();buildShop();updateHUD();updateEdu();
+// Rotate Edu phrases every 8s
+setInterval(()=>{if(document.getElementById('dashboard').classList.contains('active'))updateEdu();},8000);
+// Mute button
+document.getElementById('muteBtn').addEventListener('click',()=>{
+  _muted=!_muted;
+  document.getElementById('muteBtn').textContent=_muted?'🔇':'🔊';
+  document.getElementById('muteBtn').classList.toggle('muted',_muted);
+  if(!_muted)playSound('click');
+});
+// Confetti canvas resize
+window.addEventListener('resize',()=>{const cv=document.getElementById('confettiCanvas');cv.width=window.innerWidth;cv.height=window.innerHeight;});
 document.getElementById('lvlCloseBtn').addEventListener('click',()=>document.getElementById('lvlOverlay').classList.remove('show'));
 document.getElementById('playAgainBtn').addEventListener('click',playAgain);
 document.getElementById('resultBackBtn').addEventListener('click',goBack);
@@ -1914,12 +1764,12 @@ document.getElementById('resultHomeBtn').addEventListener('click',goBack);
 document.getElementById('navHome').addEventListener('click',()=>showScreen('dashboard'));
 document.getElementById('navBadges').addEventListener('click',()=>{showScreen('dashboard');setTimeout(()=>document.getElementById('achRow').scrollIntoView({behavior:'smooth'}),200);});
 document.getElementById('navShop').addEventListener('click',()=>{showScreen('dashboard');setTimeout(()=>document.getElementById('shopRow').scrollIntoView({behavior:'smooth'}),200);});
-document.getElementById('navStats').addEventListener('click',()=>showToast('🎮 '+state.totalPlayed+' jogadas · ✅ '+state.totalCorrect+' acertos · Nível '+state.level));
-document.getElementById('fofTrueBtn').addEventListener('click',()=>fofAnswer('Verdade'));
-document.getElementById('fofFalseBtn').addEventListener('click',()=>fofAnswer('Falso'));
-document.getElementById('wordClearBtn').addEventListener('click',wordClearAll);
-document.getElementById('wordCheckBtn').addEventListener('click',wordVerify);
+document.getElementById('navStats').addEventListener('click',()=>{
+  const top = GAMES.filter(g=>getGameProg(g.id).level>1).map(g=>{const p=getGameProg(g.id);return g.emoji+g.name.split(' ')[0]+' Nv.'+p.level;}).slice(0,4).join(' · ');
+  showToast('🎮 '+state.totalPlayed+' jogadas · '+state.totalCorrect+' certas'+(top?' · '+top:''));
+});
+document.getElementById('fofTrueBtn').addEventListener('click',()=>{playSound('click');fofAnswer('Verdade');});
+document.getElementById('fofFalseBtn').addEventListener('click',()=>{playSound('click');fofAnswer('Falso');});
+document.getElementById('wordClearBtn').addEventListener('click',()=>{playSound('click');wordClearAll();});
+document.getElementById('wordCheckBtn').addEventListener('click',()=>{playSound('click');wordVerify();});
 
-</script>
-</body>
-</html>
