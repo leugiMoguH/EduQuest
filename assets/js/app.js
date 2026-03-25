@@ -602,17 +602,49 @@ const DEF={
   achievements:{}, powerups:{hint:2,skip:1,'2x':1},
   maxStreak:0, gamesPlayed:[],
   // per-game progress: { gameId: {level:1, xp:0, seen:[]} }
-  gameProgress:{}
+  gameProgress:{},
+  wrongAnswers:{},
+  dayStreak:1, lastPlayDate:''
 };
 let state=loadState();
 let CG={}; // current game
 
+// ── Checksum for state integrity ──
+function simpleChecksum(str){
+  let hash=0;
+  for(let i=0;i<str.length;i++){hash=((hash<<5)-hash)+str.charCodeAt(i);hash|=0;}
+  return hash.toString(36);
+}
+
 function loadState(){
-  try{const s=localStorage.getItem('eq21');if(s){const p=JSON.parse(s);return Object.assign(JSON.parse(JSON.stringify(DEF)),p);}}
-  catch(e){}
+  try{
+    const s=localStorage.getItem('eq21');
+    const cs=localStorage.getItem('eq21_cs');
+    if(s){
+      if(cs&&simpleChecksum(s)!==cs){
+        console.warn('EduQuest: State integrity check failed, resetting');
+        showToastSafe('Dados corrompidos. A reiniciar...');
+        return JSON.parse(JSON.stringify(DEF));
+      }
+      const p=JSON.parse(s);
+      if(typeof p.gems!=='number'||p.gems<0)p.gems=0;
+      if(typeof p.globalXP!=='number'||p.globalXP<0)p.globalXP=0;
+      if(typeof p.globalLevel!=='number')p.globalLevel=1;
+      p.globalLevel=Math.max(1,Math.min(10,p.globalLevel));
+      return Object.assign(JSON.parse(JSON.stringify(DEF)),p);
+    }
+  }catch(e){}
   return JSON.parse(JSON.stringify(DEF));
 }
-function saveState(){try{localStorage.setItem('eq21',JSON.stringify(state));}catch(e){}}
+function saveState(){
+  try{
+    const json=JSON.stringify(state);
+    localStorage.setItem('eq21',json);
+    localStorage.setItem('eq21_cs',simpleChecksum(json));
+  }catch(e){}
+}
+// Safe toast before DOM is ready
+function showToastSafe(m){try{showToast(m);}catch(e){console.warn(m);}}
 
 // ── Per-game progress helpers ──
 function getGameProg(id){
@@ -825,7 +857,8 @@ function usePowerup(type){
   playSound('click');
   if(type==='hint'){
     if((state.powerups.hint||0)<=0||CG.answered||CG.hintUsed)return;
-    state.powerups.hint--;CG.hintUsed=true;
+    if((CG.hintsUsed||0)>=1){showToast('Só 1 dica por jogo!');return;}
+    state.powerups.hint--;CG.hintUsed=true;CG.hintsUsed=(CG.hintsUsed||0)+1;
     // Remove one wrong option from current game screen
     const opts=document.querySelectorAll('#gameOptions .option-btn:not(.correct):not(.disabled)');
     const wrong=[...opts].filter(b=>b.textContent!==(CG.questions[CG.qIndex]?.c||CG.questions[CG.qIndex]?.correct));
@@ -844,9 +877,9 @@ function usePowerup(type){
     clearInterval(CG.timer);
     const tb=document.getElementById('gameTimerBadge');
     if(tb)tb.classList.add('frozen');
-    showToast('❄️ Tempo congelado por 10 segundos!');
+    showToast('❄️ Tempo congelado por 5 segundos!');
     saveState();updatePowerupBar();
-    setTimeout(()=>{
+    TIMERS.freeze=setTimeout(()=>{
       CG.freezeActive=false;
       if(tb)tb.classList.remove('frozen');
       // Restart timer from where it was
@@ -869,7 +902,7 @@ function usePowerup(type){
         }
       },1000);
       updatePowerupBar();
-    },10000);
+    },5000);
   }
 }
 
@@ -879,7 +912,7 @@ function showScreen(id){
   if(id==='dashboard'){buildAch();buildShop();updateHUD();updateEdu();}
   if(id==='gameScreen')setTimeout(updatePowerupBar,50);
 }
-function goBack(){playSound('click');clearInterval(CG.timer);showScreen('dashboard');}
+function goBack(){playSound('click');clearAllGameTimers();showScreen('dashboard');}
 
 // ================================================================
 // GAMES CATALOGUE
@@ -931,7 +964,7 @@ function buildGameGrid(){
     const c=document.createElement('div');c.className='game-card';
     c.innerHTML=`<span class="game-card-num">#${String(i+1).padStart(2,'0')}</span><span class="game-card-emoji">${gm.emoji}</span><div class="game-card-name">${gm.name}</div><div class="game-card-lvl">${stars} Nv.${lvl}</div><div class="game-card-progress"><div class="game-card-progress-fill" style="width:${pct}%;background:${gm.color}"></div></div><div class="glow" style="background:radial-gradient(circle at 50% 50%,${gm.color}30,transparent 70%)"></div>`;
     c.style.borderColor=gm.color+'55';
-    c.addEventListener('click',()=>launchGame(gm.id));
+    c.addEventListener('click',()=>showDifficultySelector(gm.id));
     g.appendChild(c);
   });
 }
@@ -987,6 +1020,10 @@ function scoreAnswer(ok){
     // Confetti on streak ≥5 or hard question
     if(CG.streak>=5||(CG.questions[CG.qIndex]&&(CG.questions[CG.qIndex].d===3||(CG.questions[CG.qIndex].d||1)===3)))launchConfetti(40);
   }else{
+    // Queue for spaced repetition review
+    if(CG.id&&CG.questions&&CG.questions[CG.qIndex]){
+      queueWrongAnswer(CG.id, CG.questions[CG.qIndex]);
+    }
     // Shield absorbs one error
     if(CG.shieldActive){
       CG.shieldActive=false;
@@ -1034,16 +1071,44 @@ function playAgain(){if(CG.id)launchGame(CG.id);}
 // QUESTION BANK SYSTEM — per-game levels, no repeats per level
 // ================================================================
 
-// Difficulty tiers by game level:
-// Game level 1 → only d:1
-// Game level 2 → only d:1 (different pool — seen[] prevents repeats)
-// Game level 3 → only d:2
-// Game level 4 → only d:2 (new pool)
-// Game level 5 → only d:3
+// ── 5-tier difficulty system ──
 function getDiffForGameLevel(lvl){
-  if(lvl<=2) return 1;  // easy
-  if(lvl<=6) return 2;  // medium (4 levels to exhaust medium pool)
-  return 3;              // hard
+  if(lvl<=1) return 1;      // d:1 Easy
+  if(lvl<=3) return 1.5;    // d:1.5 Easy-Medium blend
+  if(lvl<=5) return 2;      // d:2 Medium
+  if(lvl<=7) return 2.5;    // d:2.5 Medium-Hard blend
+  return 3;                  // d:3 Hard
+}
+
+// Returns questions count scaled by level
+function getQCountForLevel(lvl){
+  if(lvl<=3) return 8;
+  if(lvl<=6) return 10;
+  return 12;
+}
+
+// Returns timer adjusted for difficulty
+function getTimerForDiff(baseTimer, diff){
+  if(diff<=1) return baseTimer;
+  if(diff<=1.5) return baseTimer-2;
+  if(diff<=2) return baseTimer-3;
+  if(diff<=2.5) return baseTimer-4;
+  return Math.max(8, baseTimer-5);
+}
+
+// Returns a pool of questions for intermediate difficulty tiers (blended)
+function pickQuestionsByDiff(bank, diff){
+  if(diff===1.5){
+    const easy=shuffle(bank.filter(q=>q.d===1));
+    const med=shuffle(bank.filter(q=>q.d===2));
+    return [...easy.slice(0,4),...med.slice(0,6)];
+  }
+  if(diff===2.5){
+    const med=shuffle(bank.filter(q=>q.d===2));
+    const hard=shuffle(bank.filter(q=>q.d===3));
+    return [...med.slice(0,4),...hard.slice(0,6)];
+  }
+  return bank.filter(q=>q.d===diff);
 }
 
 function pickQuestions(gameId, n){
@@ -1053,34 +1118,61 @@ function pickQuestions(gameId, n){
   const prog = getGameProg(gameId);
   const diff = getDiffForGameLevel(prog.level);
 
-  // Pool = all questions of the right difficulty
-  let pool = bank.filter(q => q.d === diff);
+  // Get the base pool for this difficulty
+  let pool = pickQuestionsByDiff(bank, diff);
   if(pool.length < 4) pool = bank.slice(); // safety fallback
 
-  // Remove already-seen questions (reset when pool exhausted)
-  const seen = prog.seen || [];
-  let unseen = pool.filter(q => !seen.includes(q.t||q.text));
+  // Track seen questions per difficulty key to avoid cross-level repetition
+  const seenKey = 'seen_d'+diff;
+  const seen = prog[seenKey] || [];
+
+  // Filter out seen questions
+  let unseen = pool.filter(q => !seen.includes(q.t||q.text||q.s||q.w));
+
+  // If pool depleted, reset only this difficulty's seen list
   if(unseen.length < n){
-    // Pool exhausted for this difficulty — reset seen for this diff
-    prog.seen = (prog.seen||[]).filter(t => {
-      const q = bank.find(b=>(b.t||b.text)===t);
-      return q && q.d !== diff; // keep seen from other diffs
-    });
+    prog[seenKey] = [];
     unseen = pool.slice();
     saveState();
   }
 
   const picked = shuffle(unseen).slice(0, n);
+
   // Mark as seen
-  picked.forEach(q => {
-    const key = q.t||q.text;
-    if(!(prog.seen||[]).includes(key)){
-      if(!prog.seen) prog.seen=[];
-      prog.seen.push(key);
-    }
-  });
+  const newSeen = picked.map(q => q.t||q.text||q.s||q.w).filter(Boolean);
+  prog[seenKey] = [...(prog[seenKey]||[]), ...newSeen];
+
+  // Inject wrong-answer review questions (spaced repetition)
+  const withReview = injectWrongAnswerReview(gameId, bank, picked);
+
   saveState();
-  return picked;
+  return withReview;
+}
+
+// ── Spaced repetition: queue wrong answers for review ──
+function queueWrongAnswer(gameId, question){
+  if(!state.wrongAnswers) state.wrongAnswers={};
+  if(!state.wrongAnswers[gameId]) state.wrongAnswers[gameId]=[];
+  const key=question.t||question.text||question.s||question.w;
+  if(key&&!state.wrongAnswers[gameId].includes(key)){
+    state.wrongAnswers[gameId].push(key);
+    if(state.wrongAnswers[gameId].length>20) state.wrongAnswers[gameId].shift();
+  }
+  saveState();
+}
+
+function injectWrongAnswerReview(gameId, bank, mainQuestions){
+  const wrongKeys=(state.wrongAnswers&&state.wrongAnswers[gameId])||[];
+  if(wrongKeys.length===0) return mainQuestions;
+  const wrongQs=bank.filter(q=>{
+    const key=q.t||q.text||q.s||q.w;
+    return wrongKeys.includes(key);
+  }).slice(0,2);
+  if(wrongQs.length===0) return mainQuestions;
+  const result=[...mainQuestions];
+  if(result.length>3) result.splice(3,0,...wrongQs.slice(0,1));
+  if(result.length>8&&wrongQs.length>1) result.splice(8,0,wrongQs[1]);
+  return result;
 }
 
 function showQLoading(title, gameLvl, onReady){
@@ -1089,7 +1181,8 @@ function showQLoading(title, gameLvl, onReady){
   document.getElementById('aiErr').classList.remove('show');
   document.getElementById('aiOrb').textContent='🎲';
   document.getElementById('aiTitle').textContent=title;
-  const diffLabel=['','Iniciante','Iniciante','Intermédio','Intermédio','Avançado'][gameLvl]||'';
+  const diffLabels=['','Iniciante','Iniciante','Fácil-Médio','Intermédio','Intermédio','Médio-Difícil','Avançado','Avançado','Expert','Mestre'];
+  const diffLabel=diffLabels[Math.min(gameLvl,diffLabels.length-1)]||'';
   document.getElementById('aiSub').textContent='Nível '+gameLvl+' · '+diffLabel+' · A selecionar perguntas novas!';
   document.getElementById('aiBar').style.width='0%';
   document.getElementById('aiStep').textContent='A escolher...';
@@ -1104,45 +1197,77 @@ function showQLoading(title, gameLvl, onReady){
 }
 
 // ================================================================
+// CENTRALIZED TIMER REGISTRY (prevents memory leaks)
+// ================================================================
+const TIMERS={game:null,survivor:null,edu:null,freeze:null};
+function clearAllGameTimers(){
+  Object.keys(TIMERS).forEach(k=>{if(TIMERS[k]){clearInterval(TIMERS[k]);TIMERS[k]=null;}});
+  if(CG&&CG.timer){clearInterval(CG.timer);CG.timer=null;}
+}
+
+// ================================================================
+// DIFFICULTY SELECTOR
+// ================================================================
+let pendingGameLaunch=null;
+
+function showDifficultySelector(gameId){
+  pendingGameLaunch=gameId;
+  const game=GAMES.find(g=>g.id===gameId);
+  const nameEl=document.getElementById('diffGameName');
+  if(nameEl) nameEl.textContent=game?(game.emoji+' '+game.name):'';
+  const ov=document.getElementById('diffOverlay');
+  if(ov) ov.style.display='flex';
+}
+
+function launchGameWithDiff(gameId, diffOverride){
+  playSound('click');
+  if(!state.gamesPlayed.includes(gameId))state.gamesPlayed.push(gameId);
+  saveState();
+  const map={
+    geo:()=>startGeo(diffOverride),
+    math:()=>startMath(diffOverride),
+    logic:()=>startLogic(diffOverride),
+    time:startTime, eco:startEco, word:startWord, fact:startFact,
+    capital:()=>startAIGame('capital','🗺️ Capital Hunt',18,22,diffOverride),
+    code:()=>startAIGame('code','💻 Code Breaker',20,22,diffOverride),
+    vocab:()=>startAIGame('vocab','📚 Vocab Journey',20,20,diffOverride),
+    art:()=>startAIGame('art','🎨 Art Critic',20,20,diffOverride),
+    space:()=>startAIGame('space','🚀 Space Explorer',18,22,diffOverride),
+    body:()=>startAIGame('body','🫀 Human Body',20,20,diffOverride),
+    music:()=>startAIGame('music','🎵 Music Master',20,20,diffOverride),
+    invent:()=>startAIGame('invent',"💡 Inventor's Lab",20,22,diffOverride),
+    crypto:()=>startAIGame('crypto','🔐 Crypto-Logic',22,20,diffOverride),
+    animal:()=>startAIGame('animal','🦁 Animal Kingdom',18,20,diffOverride),
+    currency:()=>startAIGame('currency','💰 Currency Conv.',20,22,diffOverride),
+    olympic:()=>startAIGame('olympic','🏅 Olympic Trivia',18,20,diffOverride),
+    lit:()=>startAIGame('lit','📖 Literature',20,20,diffOverride),
+    english:()=>startAIGame('english','🇬🇧 English Quest',20,22,diffOverride),
+  };
+  if(map[gameId])map[gameId]();
+}
+
+// ================================================================
 // LAUNCH DISPATCHER
 // ================================================================
 function launchGame(id){
-  playSound('click');
-  if(!state.gamesPlayed.includes(id))state.gamesPlayed.push(id);
-  saveState();
-  const map={
-    geo:startGeo, math:startMath, logic:startLogic,
-    time:startTime, eco:startEco, word:startWord, fact:startFact,
-    capital:()=>startAIGame('capital','🗺️ Capital Hunt',18,22),
-    code:()=>startAIGame('code','💻 Code Breaker',20,22),
-    vocab:()=>startAIGame('vocab','📚 Vocab Journey',20,20),
-    art:()=>startAIGame('art','🎨 Art Critic',20,20),
-    space:()=>startAIGame('space','🚀 Space Explorer',18,22),
-    body:()=>startAIGame('body','🫀 Human Body',20,20),
-    music:()=>startAIGame('music','🎵 Music Master',20,20),
-    invent:()=>startAIGame('invent',"💡 Inventor's Lab",20,22),
-    crypto:()=>startAIGame('crypto','🔐 Crypto-Logic',22,20),
-    animal:()=>startAIGame('animal','🦁 Animal Kingdom',18,20),
-    currency:()=>startAIGame('currency','💰 Currency Conv.',20,22),
-    olympic:()=>startAIGame('olympic','🏅 Olympic Trivia',18,20),
-    lit:()=>startAIGame('lit','📖 Literature',20,20),
-    english:()=>startAIGame('english','🇬🇧 English Quest',20,22),
-  };
-  if(map[id])map[id]();
+  showDifficultySelector(id);
 }
 
 // ================================================================
 // GENERIC QUIZ ENGINE (QB-powered, per-game levels)
 // ================================================================
-function startAIGame(id, title, timeLimit, xpPerQ){
+function startAIGame(id, title, baseTimeLimit, xpPerQ, diffOverride){
   const prog = getGameProg(id);
+  const diff = diffOverride || getDiffForGameLevel(prog.level);
+  const qCount = getQCountForLevel(prog.level);
+  const timeLimit = getTimerForDiff(baseTimeLimit, diff);
   showQLoading(title, prog.level, ()=>{
-    const questions = pickQuestions(id, 10);
+    const questions = pickQuestions(id, qCount);
     if(!questions || questions.length < 4){
       showToast('⚠️ Banco de perguntas não encontrado para: '+id);
       goBack(); return;
     }
-    CG={id,title,total:Math.min(10,questions.length),correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,gameLvl:prog.level,questions,hintUsed:false,shieldActive:false,freezeActive:false};
+    CG={id,title,total:Math.min(qCount,questions.length),correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,gameLvl:prog.level,questions,hintUsed:false,hintsUsed:0,shieldActive:false,freezeActive:false,diff};
     document.getElementById('gameTitle').textContent=title;
     document.getElementById('gameLvlNum').textContent=prog.level;
     showScreen('gameScreen');
@@ -1316,8 +1441,11 @@ const GEO_DATA=[
   {flag:'Coreia do Sul',country:'Coreia do Sul',opts:['Coreia do Sul','Japão','China','Taiwán'],fact:'A Coreia do Sul tem a internet mais rápida do mundo!'},
 ];
 
-function startGeo(){
-  CG={id:'geo',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:22,timeLimit:15,timeLeft:15,timer:null,answered:false,qIndex:0,questions:shuffle(GEO_DATA).slice(0,10)};
+function startGeo(diffOverride){
+  const prog=getGameProg('geo');
+  const diff=diffOverride||getDiffForGameLevel(prog.level);
+  const timeLimit=getTimerForDiff(15,diff);
+  CG={id:'geo',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:22,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,questions:shuffle(GEO_DATA).slice(0,10),diff};
   showScreen('geoScreen');renderGeo();
 }
 function renderGeo(){
@@ -1354,11 +1482,13 @@ function renderGeo(){
 // ================================================================
 // MATH NINJA (procedural - infinite variety)
 // ================================================================
-function startMath(){
-  CG={id:'math',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:25,timeLimit:12,timeLeft:12,timer:null,answered:false,qIndex:0,lives:3};
+function startMath(diffOverride){
+  const prog=getGameProg('math');
+  const diff=diffOverride||getDiffForGameLevel(prog.level);
+  const timeLimit=getTimerForDiff(15,diff);
+  CG={id:'math',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:25,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,lives:3,diff};
   showScreen('mathScreen');
-  const _mathProg=getGameProg('math');
-  document.getElementById('mathLvlNum').textContent=_mathProg.level;
+  document.getElementById('mathLvlNum').textContent=prog.level;
   renderMath();
 }
 function genMathQ(){
@@ -1448,8 +1578,11 @@ function genLogicQ(){
   const decoys=new Set([answer]);while(decoys.size<4){const v=answer+(rnd(-5,5)||1);if(v>0)decoys.add(v);}
   return{seq:[...seq.map(String),'?'],answer:String(answer),opts:shuffle([...decoys].map(String)),fact};
 }
-function startLogic(){
-  CG={id:'logic',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:25,timeLimit:25,timeLeft:25,timer:null,answered:false,qIndex:0};
+function startLogic(diffOverride){
+  const prog=getGameProg('logic');
+  const diff=diffOverride||getDiffForGameLevel(prog.level);
+  const timeLimit=getTimerForDiff(20,diff);
+  CG={id:'logic',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:25,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,diff};
   showScreen('logicScreen');
   document.getElementById('logicLvlNum').textContent=state.level;
   renderLogic();
@@ -1574,7 +1707,7 @@ const FOF_FALLBACK=[
 ];
 function startFoFFallback(diff){
   const qs=shuffle([...FOF_FALLBACK,...((window.CONTENT_EXPANSION&&CONTENT_EXPANSION.factOrFiction)||[])]).slice(0,10).map(q=>({...q,options:['Verdade','Falso']}));
-  CG={id:'fact',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:18,timeLimit:15,timeLeft:15,timer:null,answered:false,qIndex:0,difficulty:diff||1,questions:qs};
+  CG={id:'fact',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:18,timeLimit:12,timeLeft:12,timer:null,answered:false,qIndex:0,difficulty:diff||1,questions:qs};
   document.getElementById('fofLvlNum').textContent=diff||1;
   showScreen('fofScreen');renderFoF();
 }
@@ -1782,6 +1915,25 @@ document.getElementById('survivorBtn').addEventListener('click',()=>{playSound('
 document.getElementById('survivorBackBtn').addEventListener('click',()=>{clearInterval(SV&&SV.timer);goBack();});
 document.getElementById('statsBackBtn').addEventListener('click',()=>showScreen('dashboard'));
 
+// ── Difficulty Selector Overlay ──
+(function(){
+  const ov=document.getElementById('diffOverlay');
+  const diffEasy=document.getElementById('diffEasy');
+  const diffMedium=document.getElementById('diffMedium');
+  const diffHard=document.getElementById('diffHard');
+  const diffCancel=document.getElementById('diffCancelBtn');
+  const diffAuto=document.getElementById('diffAuto');
+  function closeOverlay(){if(ov)ov.style.display='none';pendingGameLaunch=null;}
+  function launchAndClose(diff){const id=pendingGameLaunch;closeOverlay();if(id)launchGameWithDiff(id,diff);}
+  if(diffEasy) diffEasy.addEventListener('click',()=>launchAndClose(1));
+  if(diffMedium) diffMedium.addEventListener('click',()=>launchAndClose(2));
+  if(diffHard) diffHard.addEventListener('click',()=>launchAndClose(3));
+  if(diffAuto) diffAuto.addEventListener('click',()=>launchAndClose(null));
+  if(diffCancel) diffCancel.addEventListener('click',closeOverlay);
+  // Close on backdrop click
+  if(ov) ov.addEventListener('click',(e)=>{if(e.target===ov)closeOverlay();});
+})();
+
 // ================================================================
 // FACTO DO DIA
 // ================================================================
@@ -1935,7 +2087,7 @@ function survivorAnswer(choice,q){
     if(!ok&&b.textContent===choice)b.classList.add('wrong');
   });
   if(ok){SV.score++;document.getElementById('survivorScore').textContent='✅ '+SV.score;vibrate([15,0,15]);playSound('success');}
-  else{SV.timeLeft=Math.max(0,SV.timeLeft-5);document.getElementById('survivorTime').textContent=SV.timeLeft;document.getElementById('survivorTimerFill').style.width=(SV.timeLeft/60*100)+'%';vibrate([100]);playSound('error');shakeScreen();}
+  else{SV.timeLeft=Math.max(0,SV.timeLeft-3);document.getElementById('survivorTime').textContent=SV.timeLeft;document.getElementById('survivorTimerFill').style.width=(SV.timeLeft/60*100)+'%';vibrate([100]);playSound('error');shakeScreen();}
   SV.qIndex++;
   setTimeout(renderSurvivorQ,ok?400:800);
 }

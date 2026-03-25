@@ -2,8 +2,13 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none';">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EduQuest 20</title>
+<meta name="description" content="EduQuest - Plataforma de jogos educativos para jovens. Aprende com jogos de matemática, geografia, vocabulário e muito mais!">
+<title>EduQuest - Jogos Educativos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
@@ -51,16 +56,16 @@
   </div>
 </div>
 
-<div id="app">
+<main id="app" role="main">
 <!-- DASHBOARD -->
 <div id="dashboard" class="screen active">
   <div class="header">
     <div class="logo">EduQuest</div>
-    <div class="header-stats">
+    <div class="header-stats" aria-live="polite" aria-label="Estatísticas do jogador">
       <div class="stat-pill">💎 <span id="gemCount">0</span></div>
       <div class="stat-pill">⚡ <span id="xpCount">0</span></div>
       <div class="stat-pill streak-pill" id="dayStreakPill">🔥 <span id="dayStreakCount">0</span>d</div>
-      <button class="mute-btn" id="muteBtn">🔊</button>
+      <button class="mute-btn" id="muteBtn" aria-label="Silenciar som" aria-pressed="false">🔊</button>
     </div>
   </div>
   <div class="edu-bubble" id="eduBubble">
@@ -99,9 +104,9 @@
 </div>
 
 <!-- UNIVERSAL GAME SCREEN (used by all AI games) -->
-<div id="gameScreen" class="screen">
+<div id="gameScreen" class="screen" role="region" aria-label="Jogo de perguntas">
   <div class="game-header">
-    <div class="back-btn" id="gameBackBtn">←</div>
+    <div class="back-btn" id="gameBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block">
       <div class="game-title" id="gameTitle">Jogo</div>
       <div class="game-subtitle">Q <span id="gameQNum">1</span>/10 · Nível <span id="gameLvlNum">1</span></div>
@@ -116,9 +121,9 @@
       <div class="timer-badge" id="gameTimerBadge">⏱ <span id="gameTimer">20</span>s</div>
     </div>
     <div class="powerup-bar" id="gamePowerupBar">
-      <button class="pu-btn" id="puHintBtn" onclick="usePowerup('hint')">🔍 Dica <span class="pu-count" id="puHintCount">0</span></button>
-      <button class="pu-btn" id="puShieldBtn" onclick="usePowerup('shield')">🛡️ Escudo <span class="pu-count" id="puShieldCount">0</span></button>
-      <button class="pu-btn" id="puFreezeBtn" onclick="usePowerup('freeze')">❄️ Gelo <span class="pu-count" id="puFreezeCount">0</span></button>
+      <button class="pu-btn" id="puHintBtn" onclick="usePowerup('hint')" aria-label="Usar dica - remove uma opção errada">🔍 Dica <span class="pu-count" id="puHintCount">0</span></button>
+      <button class="pu-btn" id="puShieldBtn" onclick="usePowerup('shield')" aria-label="Usar escudo - protege o streak">🛡️ Escudo <span class="pu-count" id="puShieldCount">0</span></button>
+      <button class="pu-btn" id="puFreezeBtn" onclick="usePowerup('freeze')" aria-label="Usar gelo - para o temporizador por 5 segundos">❄️ Gelo <span class="pu-count" id="puFreezeCount">0</span></button>
     </div>
     <div class="q-card">
       <div class="q-visual" id="gameVisual">❓</div>
@@ -131,9 +136,9 @@
 </div>
 
 <!-- WORD SCRAMBLE SCREEN -->
-<div id="wordScreen" class="screen">
+<div id="wordScreen" class="screen" role="region" aria-label="Word Scramble">
   <div class="game-header">
-    <div class="back-btn" id="wordBackBtn">←</div>
+    <div class="back-btn" id="wordBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">🔤 Word Scramble</div><div class="game-subtitle">Palavra <span id="wordQNum">1</span>/8 · Nível <span id="wordLvlNum">1</span></div></div>
     <div class="stat-pill">⚡ <span id="wordXP">0</span></div>
   </div>
@@ -155,9 +160,9 @@
 </div>
 
 <!-- FACT OR FICTION SCREEN -->
-<div id="fofScreen" class="screen">
+<div id="fofScreen" class="screen" role="region" aria-label="Facto ou Ficção">
   <div class="game-header">
-    <div class="back-btn" id="fofBackBtn">←</div>
+    <div class="back-btn" id="fofBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">🤔 Fact or Fiction</div><div class="game-subtitle">Q <span id="fofQNum">1</span>/10 · Nível <span id="fofLvlNum">1</span></div></div>
     <div class="stat-pill">⚡ <span id="fofXP">0</span></div>
   </div>
@@ -182,9 +187,9 @@
 </div>
 
 <!-- MATH NINJA SCREEN -->
-<div id="mathScreen" class="screen">
+<div id="mathScreen" class="screen" role="region" aria-label="Math Ninja">
   <div class="game-header">
-    <div class="back-btn" id="mathBackBtn">←</div>
+    <div class="back-btn" id="mathBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">⚔️ Math Ninja</div><div class="game-subtitle">Q <span id="mathQNum">1</span>/10 · Nível <span id="mathLvlNum">1</span></div></div>
     <div class="stat-pill">⚡ <span id="mathXP">0</span></div>
   </div>
@@ -204,9 +209,9 @@
 </div>
 
 <!-- GEO FLAGS SCREEN -->
-<div id="geoScreen" class="screen">
+<div id="geoScreen" class="screen" role="region" aria-label="Geo-Flags">
   <div class="game-header">
-    <div class="back-btn" id="geoBackBtn">←</div>
+    <div class="back-btn" id="geoBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">🌍 Geo-Flags</div><div class="game-subtitle">Q <span id="geoQNum">1</span>/10</div></div>
     <div class="stat-pill">⚡ <span id="geoXP">0</span></div>
   </div>
@@ -228,9 +233,9 @@
 </div>
 
 <!-- TIME MACHINE SCREEN -->
-<div id="timeScreen" class="screen">
+<div id="timeScreen" class="screen" role="region" aria-label="Máquina do Tempo">
   <div class="game-header">
-    <div class="back-btn" id="timeBackBtn">←</div>
+    <div class="back-btn" id="timeBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">⏳ Time Machine</div><div class="game-subtitle">Ronda <span id="timeQNum">1</span>/4 · Nível <span id="timeLvlNum">1</span></div></div>
     <div class="stat-pill">⚡ <span id="timeXP">0</span></div>
   </div>
@@ -249,9 +254,9 @@
 </div>
 
 <!-- ECO TYCOON SCREEN -->
-<div id="ecoScreen" class="screen">
+<div id="ecoScreen" class="screen" role="region" aria-label="Eco-Tycoon">
   <div class="game-header">
-    <div class="back-btn" id="ecoBackBtn">←</div>
+    <div class="back-btn" id="ecoBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">🌱 Eco-Tycoon</div><div class="game-subtitle">Nível <span id="ecoQNum">1</span>/4 · Dif. <span id="ecoLvlNum">1</span></div></div>
     <div class="stat-pill">⚡ <span id="ecoXP">0</span></div>
   </div>
@@ -272,9 +277,9 @@
 </div>
 
 <!-- LOGIC MATRIX SCREEN -->
-<div id="logicScreen" class="screen">
+<div id="logicScreen" class="screen" role="region" aria-label="Logic Matrix">
   <div class="game-header">
-    <div class="back-btn" id="logicBackBtn">←</div>
+    <div class="back-btn" id="logicBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">🧩 Logic Matrix</div><div class="game-subtitle">Puzzle <span id="logicQNum">1</span>/10 · Nível <span id="logicLvlNum">1</span></div></div>
     <div class="stat-pill">⚡ <span id="logicXP">0</span></div>
   </div>
@@ -295,9 +300,9 @@
 </div>
 
 <!-- RESULT SCREEN -->
-<div id="resultScreen" class="screen">
+<div id="resultScreen" class="screen" role="region" aria-label="Resultados">
   <div class="game-header">
-    <div class="back-btn" id="resultBackBtn">←</div>
+    <div class="back-btn" id="resultBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">Resultado Final</div></div>
   </div>
   <div style="padding:0 20px;text-align:center">
@@ -319,7 +324,7 @@
 <!-- STATS SCREEN -->
 <div id="statsScreen" class="screen">
   <div class="game-header">
-    <div class="back-btn" id="statsBackBtn">←</div>
+    <div class="back-btn" id="statsBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block"><div class="game-title">📊 As Tuas Estatísticas</div></div>
   </div>
   <div class="stats-body" id="statsBody">
@@ -328,9 +333,9 @@
 </div>
 
 <!-- SURVIVOR MODE SCREEN -->
-<div id="survivorScreen" class="screen">
+<div id="survivorScreen" class="screen" role="region" aria-label="Modo Sobrevivente">
   <div class="game-header">
-    <div class="back-btn" id="survivorBackBtn">←</div>
+    <div class="back-btn" id="survivorBackBtn" role="button" aria-label="Voltar">←</div>
     <div class="game-title-block">
       <div class="game-title">⚡ Modo Sobrevivente</div>
       <div class="game-subtitle">Responde ao máximo!</div>
@@ -350,14 +355,53 @@
   </div>
 </div>
 
-</div><!-- /app -->
-
-<div class="bottom-nav">
-  <div class="nav-btn active" id="navHome"><span class="nav-icon">🏠</span><span class="nav-label">Início</span></div>
-  <div class="nav-btn" id="navBadges"><span class="nav-icon">🏅</span><span class="nav-label">Medalhas</span></div>
-  <div class="nav-btn" id="navShop"><span class="nav-icon">🛒</span><span class="nav-label">Loja</span></div>
-  <div class="nav-btn" id="navStats"><span class="nav-icon">📊</span><span class="nav-label">Stats</span></div>
+<!-- DIFFICULTY SELECTOR -->
+<div class="difficulty-overlay" id="diffOverlay" role="dialog" aria-modal="true" aria-labelledby="diffTitle" style="display:none">
+  <div class="difficulty-box">
+    <div class="difficulty-icon">🎯</div>
+    <div class="difficulty-title" id="diffTitle">Escolhe a Dificuldade</div>
+    <div class="difficulty-game-name" id="diffGameName"></div>
+    <div class="difficulty-options">
+      <button class="diff-btn diff-easy" id="diffEasy" aria-label="Dificuldade fácil">
+        <span class="diff-icon">🌱</span>
+        <span class="diff-label">Fácil</span>
+        <span class="diff-desc">Perguntas básicas</span>
+      </button>
+      <button class="diff-btn diff-medium" id="diffMedium" aria-label="Dificuldade média">
+        <span class="diff-icon">⚡</span>
+        <span class="diff-label">Médio</span>
+        <span class="diff-desc">Desafio moderado</span>
+      </button>
+      <button class="diff-btn diff-hard" id="diffHard" aria-label="Dificuldade difícil">
+        <span class="diff-icon">🔥</span>
+        <span class="diff-label">Difícil</span>
+        <span class="diff-desc">Para experts</span>
+      </button>
+    </div>
+    <button class="big-btn secondary" id="diffCancelBtn" aria-label="Cancelar e voltar">Cancelar</button>
+  </div>
 </div>
+
+</main><!-- /app -->
+
+<nav class="bottom-nav" role="navigation" aria-label="Navegação principal">
+  <button class="nav-btn active" id="navHome" aria-label="Início" aria-current="page">
+    <span class="nav-icon" aria-hidden="true">🏠</span>
+    <span class="nav-label">Início</span>
+  </button>
+  <button class="nav-btn" id="navBadges" aria-label="Conquistas e medalhas">
+    <span class="nav-icon" aria-hidden="true">🏅</span>
+    <span class="nav-label">Medalhas</span>
+  </button>
+  <button class="nav-btn" id="navShop" aria-label="Loja de power-ups">
+    <span class="nav-icon" aria-hidden="true">🛒</span>
+    <span class="nav-label">Loja</span>
+  </button>
+  <button class="nav-btn" id="navStats" aria-label="Estatísticas">
+    <span class="nav-icon" aria-hidden="true">📊</span>
+    <span class="nav-label">Stats</span>
+  </button>
+</nav>
 
 <script src="assets/js/content-expansion.js"></script>
 <script src="assets/js/app.js"></script>
