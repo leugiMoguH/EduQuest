@@ -2438,3 +2438,107 @@ body.light-mode #aiScreen {
     padding: 28px 20px;
   }
 }
+
+/* ============================
+   DIFFICULTY SELECTOR OVERLAY
+   ============================ */
+.difficulty-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.difficulty-box {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+
+.difficulty-icon {
+  font-size: 3rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.difficulty-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.difficulty-game-name {
+  font-size: .9rem;
+  color: var(--text2);
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.difficulty-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.diff-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--rs);
+  border: 2px solid transparent;
+  background: rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease;
+  text-align: left;
+  width: 100%;
+  color: var(--text);
+}
+
+.diff-btn:focus-visible {
+  outline: 3px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .diff-btn:hover { transform: scale(1.02); }
+  .diff-easy:hover  { background: rgba(16,185,129,.15); }
+  .diff-medium:hover{ background: rgba(245,158,11,.15); }
+  .diff-hard:hover  { background: rgba(239,68,68,.15); }
+}
+
+.diff-btn:active { transform: scale(.97); }
+
+.diff-easy  { border-color: #10b981; }
+.diff-medium{ border-color: #f59e0b; }
+.diff-hard  { border-color: #ef4444; }
+
+.diff-icon  { font-size: 1.6rem; flex-shrink: 0; }
+
+.diff-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  display: block;
+  color: var(--text);
+}
+
+.diff-desc {
+  font-size: .75rem;
+  color: var(--text2);
+  display: block;
+}
