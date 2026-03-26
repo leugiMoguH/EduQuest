@@ -1971,6 +1971,44 @@ function startWord(){startWordWithAI();}
 if(window.CONTENT_EXPANSION&&CONTENT_EXPANSION.vocab)QB.vocab=CONTENT_EXPANSION.vocab;
 
 // ================================================================
+// FACTO DO DIA
+// ================================================================
+const DAILY_FACTS=[
+  'Os polvos têm 3 corações, 9 cérebros e sangue azul!',
+  'O mel nunca se estraga — pode durar 3000 anos!',
+  'A Lua afasta-se da Terra 3,8 cm por ano.',
+  'Os tubarões existem há mais tempo que as árvores na Terra!',
+  'Uma formiga consegue carregar até 50x o seu próprio peso.',
+  'A Terra gira à volta do Sol a 107.000 km/h!',
+  'Os golfinhos dormem com metade do cérebro de cada vez.',
+  'Portugal tem mais costa marítima do que Espanha!',
+  'O cérebro humano tem 86 mil milhões de neurónios.',
+  'Os elefantes são os únicos mamíferos que não conseguem saltar.',
+  'A fotossíntese produz o oxigénio que respiramos.',
+  'O universo tem 13,8 mil milhões de anos.',
+  'Há mais estrelas no universo que grãos de areia na Terra.',
+  'A velocidade da luz é 300.000 km/s — o limite máximo do universo!',
+  'Os caracóis podem dormir 3 anos seguidos em períodos de seca.',
+  'O coração de uma baleia azul pesa 180kg.',
+  'As borboletas provam as plantas com os pés.',
+  'O plâncton produz mais de 50% do oxigénio que respiramos.',
+  'Um relâmpago tem 300 milhões de volts de eletricidade.',
+  'O Grand Canyon foi criado ao longo de 5 a 6 milhões de anos.',
+  'Os dinossauros existiram durante 165 milhões de anos.',
+  'A Grande Muralha da China tem 21.196 km de comprimento.',
+  'Vasco da Gama chegou à Índia em 1498 abrindo a rota marítima.',
+  'A democracia nasceu em Atenas há 2500 anos.',
+  'O ADN humano teria 2 metros se esticado — por cada célula!',
+  'Há mais de 7000 satélites artificiais a orbitar a Terra.',
+  'Os tubarões podem ter até 50.000 dentes ao longo da vida.',
+  'A Floresta Amazónica produz 20% do oxigénio do planeta.',
+  'O ser humano partilha 98,7% do ADN com os chimpanzés.',
+  'A Lua foi formada há 4,5 mil milhões de anos de uma colisão gigante.',
+  'A pressão no fundo do oceano é 1000x maior que na superfície.',
+  'Os pinguins são o único animal que anda para a frente e para trás.'
+];
+
+// ================================================================
 // INIT
 // ================================================================
 createStars();buildGameGrid();buildAch();buildShop();updateHUD();updateEdu();
@@ -2027,40 +2065,6 @@ document.getElementById('statsBackBtn').addEventListener('click',()=>showScreen(
 // ================================================================
 // FACTO DO DIA
 // ================================================================
-const DAILY_FACTS=[
-  'Os polvos têm 3 corações, 9 cérebros e sangue azul!',
-  'O mel nunca se estraga — pode durar 3000 anos!',
-  'A Lua afasta-se da Terra 3,8 cm por ano.',
-  'Os tubarões existem há mais tempo que as árvores na Terra!',
-  'Uma formiga consegue carregar até 50x o seu próprio peso.',
-  'A Terra gira à volta do Sol a 107.000 km/h!',
-  'Os golfinhos dormem com metade do cérebro de cada vez.',
-  'Portugal tem mais costa marítima do que Espanha!',
-  'O cérebro humano tem 86 mil milhões de neurónios.',
-  'Os elefantes são os únicos mamíferos que não conseguem saltar.',
-  'A fotossíntese produz o oxigénio que respiramos.',
-  'O universo tem 13,8 mil milhões de anos.',
-  'Há mais estrelas no universo que grãos de areia na Terra.',
-  'A velocidade da luz é 300.000 km/s — o limite máximo do universo!',
-  'Os caracóis podem dormir 3 anos seguidos em períodos de seca.',
-  'O coração de uma baleia azul pesa 180kg.',
-  'As borboletas provam as plantas com os pés.',
-  'O plâncton produz mais de 50% do oxigénio que respiramos.',
-  'Um relâmpago tem 300 milhões de volts de eletricidade.',
-  'O Grand Canyon foi criado ao longo de 5 a 6 milhões de anos.',
-  'Os dinossauros existiram durante 165 milhões de anos.',
-  'A Grande Muralha da China tem 21.196 km de comprimento.',
-  'Vasco da Gama chegou à Índia em 1498 abrindo a rota marítima.',
-  'A democracia nasceu em Atenas há 2500 anos.',
-  'O ADN humano teria 2 metros se esticado — por cada célula!',
-  'Há mais de 7000 satélites artificiais a orbitar a Terra.',
-  'Os tubarões podem ter até 50.000 dentes ao longo da vida.',
-  'A Floresta Amazónica produz 20% do oxigénio do planeta.',
-  'O ser humano partilha 98,7% do ADN com os chimpanzés.',
-  'A Lua foi formada há 4,5 mil milhões de anos de uma colisão gigante.',
-  'A pressão no fundo do oceano é 1000x maior que na superfície.',
-  'Os pinguins são o único animal que anda para a frente e para trás.'
-];
 function initFactoDia(){
   const idx=Math.floor(Date.now()/(1000*60*60*24))%DAILY_FACTS.length;
   document.getElementById('factoDiaText').textContent=DAILY_FACTS[idx];
