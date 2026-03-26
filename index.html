@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/styles.css?v=4">
 </head>
 <body>
 <div class="stars" id="stars"></div>
@@ -60,12 +60,14 @@
 <!-- DASHBOARD -->
 <div id="dashboard" class="screen active">
   <div class="header">
-    <div class="logo">EduQuest</div>
+    <div class="header-top-row">
+      <div class="logo">EduQuest</div>
+      <button class="mute-btn" id="muteBtn" aria-label="Silenciar som" aria-pressed="false">🔊</button>
+    </div>
     <div class="header-stats" aria-live="polite" aria-label="Estatísticas do jogador">
       <div class="stat-pill">💎 <span id="gemCount">0</span></div>
       <div class="stat-pill">⚡ <span id="xpCount">0</span></div>
       <div class="stat-pill streak-pill" id="dayStreakPill">🔥 <span id="dayStreakCount">0</span>d</div>
-      <button class="mute-btn" id="muteBtn" aria-label="Silenciar som" aria-pressed="false">🔊</button>
     </div>
   </div>
   <div class="edu-bubble" id="eduBubble">
@@ -403,7 +405,7 @@
   </button>
 </nav>
 
-<script src="assets/js/content-expansion.js?v=2"></script>
-<script src="assets/js/app.js?v=2"></script>
+<script src="assets/js/content-expansion.js?v=4"></script>
+<script src="assets/js/app.js?v=4"></script>
 </body>
 </html>

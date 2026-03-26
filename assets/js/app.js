@@ -1385,10 +1385,12 @@ function startAIGameFallback(id,title,timeLimit,xpPerQ,diff){
 // ================================================================
 // SVG FLAGS + GEO GAME
 // ================================================================
-function mkSVG(inner){return'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60">'+inner+'</svg>';}
+function mkSVG(inner){return'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 60" shape-rendering="geometricPrecision" style="display:block">'+inner+'</svg>';}
 function r(x,y,w,h,f){return'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+f+'"/>';}
 function cc(x,y,rad,f){return'<circle cx="'+x+'" cy="'+y+'" r="'+rad+'" fill="'+f+'"/>';}
 function sv(cols,dir){var s='',n=cols.length;if(dir==='v'){var w=90/n;cols.forEach((f,i)=>{s+=r(i*w,0,w,60,f);});}else{var h=60/n;cols.forEach((f,i)=>{s+=r(0,i*h,90,h,f);});}return s;}
+function ln(x1,y1,x2,y2,c,w){return'<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+c+'" stroke-width="'+w+'"/>';}
+function pg(pts,f){return'<polygon points="'+pts+'" fill="'+f+'"/>';}
 const FLAGS={
   'Portugal':mkSVG(r(0,0,30,60,'#006600')+r(30,0,60,60,'#FF0000')+cc(30,30,12,'#FFD700')+cc(30,30,8,'#FFF')+cc(30,30,5,'#003399')),
   'Brasil':mkSVG(r(0,0,90,60,'#009C3B')+'<polygon points="45,5 85,30 45,55 5,30" fill="#FFDF00"/>'+cc(45,30,13,'#003087')+r(32,26,26,8,'#003087')+'<text x="45" y="33" text-anchor="middle" font-size="4" fill="white">ORDEM E PROGRESSO</text>'),
@@ -1461,6 +1463,59 @@ const FLAGS={
   'Irão':mkSVG(sv(['#239F40','#FFF','#DA0000'],'h')+'<text x="45" y="34" text-anchor="middle" font-size="8" fill="#DA0000">الله أكبر</text>'),
   'Israel':mkSVG(r(0,0,90,60,'#FFF')+r(0,8,90,8,'#0038B8')+r(0,44,90,8,'#0038B8')+'<polygon points="45,20 55,36 35,36" fill="none" stroke="#0038B8" stroke-width="3"/><polygon points="45,40 55,24 35,24" fill="none" stroke="#0038B8" stroke-width="3"/>'),
   'Gana':mkSVG(sv(['#CF0921','#FCD116','#006B3F'],'h')+cc(45,30,7,'#000')),
+  // ── Additional flags ──
+  'Rússia':mkSVG(sv(['#FFF','#003DA5','#CC0000'],'h')),
+  'Catar':mkSVG(r(0,0,90,60,'#8D1B3D')+pg('0,0 22,0 30,3 22,6 30,9 22,12 30,15 22,18 30,21 22,24 30,27 22,30 30,33 22,36 30,39 22,42 30,45 22,48 30,51 22,54 30,57 22,60 0,60','#FFF')),
+  'Emirados Árabes':mkSVG(r(0,0,90,20,'#EF3340')+r(0,20,90,20,'#FFF')+r(0,40,90,20,'#000')+r(0,0,25,60,'#009A44')),
+  'Singapura':mkSVG(r(0,0,90,30,'#EF3340')+r(0,30,90,30,'#FFF')+cc(18,18,9,'#FFF')+cc(23,18,9,'#EF3340')+'<text x="35" y="13" text-anchor="middle" font-size="7" fill="#FFF">★</text><text x="42" y="19" text-anchor="middle" font-size="7" fill="#FFF">★</text><text x="39" y="27" text-anchor="middle" font-size="7" fill="#FFF">★</text><text x="30" y="27" text-anchor="middle" font-size="7" fill="#FFF">★</text><text x="27" y="19" text-anchor="middle" font-size="7" fill="#FFF">★</text>'),
+  'Bangladesh':mkSVG(r(0,0,90,60,'#006A4E')+cc(42,30,18,'#F42A41')),
+  'Sri Lanka':mkSVG(r(0,0,90,60,'#FFD100')+r(3,3,84,54,'#8D153A')+r(3,3,16,54,'#FF7F00')+r(19,3,16,54,'#006A4E')+'<text x="60" y="42" text-anchor="middle" font-size="28" fill="#FFD100">𓃰</text>'),
+  'Jordânia':mkSVG(sv(['#000','#FFF','#007A3D'],'h')+pg('0,0 38,30 0,60','#CE1126')+cc(16,30,5,'#FFF')+'<text x="16" y="33" text-anchor="middle" font-size="7" fill="#CE1126">★</text>'),
+  'Líbano':mkSVG(r(0,0,90,60,'#FFF')+r(0,0,90,15,'#EE161F')+r(0,45,90,15,'#EE161F')+pg('45,18 52,30 57,30 45,43 33,30 38,30','#00A550')),
+  'Argélia':mkSVG(r(0,0,45,60,'#006233')+r(45,0,45,60,'#FFF')+cc(50,30,14,'#D21034')+cc(55,30,11,'#FFF')+'<text x="61" y="27" font-size="7" fill="#D21034">★</text>'),
+  'Tunísia':mkSVG(r(0,0,90,60,'#E70013')+cc(45,30,15,'#FFF')+cc(42,30,10,'#E70013')+cc(46,30,7,'#FFF')+'<text x="49" y="27" font-size="7" fill="#E70013">★</text>'),
+  'Líbia':mkSVG(r(0,0,90,20,'#000')+r(0,20,90,20,'#EF3340')+r(0,40,90,20,'#239E46')+cc(40,30,9,'#FFF')+cc(44,30,7,'#EF3340')+'<text x="50" y="27" font-size="6" fill="#FFF">★</text>'),
+  'Somália':mkSVG(r(0,0,90,60,'#4189DD')+'<text x="45" y="40" text-anchor="middle" font-size="26" fill="#FFF">★</text>'),
+  'Tanzânia':mkSVG(r(0,0,90,60,'#1EB53A')+pg('0,60 90,60 90,4','#00A3DD')+pg('0,42 90,2 90,10 0,50','#FCD116')+pg('0,60 0,52 90,10 90,60','#FCD116')+pg('0,50 90,8 90,2 0,42','#1A1A1A')),
+  'Uganda':mkSVG(sv(['#000','#FCDC04','#DE3108','#000','#FCDC04','#DE3108'],'h')+cc(45,30,12,'#FFF')+'<text x="45" y="36" text-anchor="middle" font-size="14" fill="#777">🐦</text>'),
+  'Camarões':mkSVG(sv(['#007A5E','#CE1126','#FCD116'],'v')+'<text x="45" y="36" text-anchor="middle" font-size="14" fill="#FCD116">★</text>'),
+  'Senegal':mkSVG(sv(['#00853F','#FDEF42','#E31B23'],'v')+'<text x="45" y="36" text-anchor="middle" font-size="14" fill="#00853F">★</text>'),
+  'Costa do Marfim':mkSVG(sv(['#F77F00','#FFF','#009A44'],'v')),
+  'Ruanda':mkSVG(r(0,0,90,30,'#20B2D4')+r(0,30,90,16,'#E5BE01')+r(0,46,90,14,'#20603D')+cc(74,15,9,'#E5BE01')+cc(74,15,5,'#20B2D4')),
+  'Zimbabué':mkSVG(sv(['#006400','#FFD200','#EF3340','#000','#EF3340','#FFD200','#006400'],'h')+pg('0,0 26,30 0,60','#FFF')+'<text x="10" y="34" text-anchor="middle" font-size="10" fill="#EF3340">★</text>'),
+  'Botswana':mkSVG(r(0,0,90,60,'#75AADB')+r(0,22,90,4,'#FFF')+r(0,26,90,8,'#000')+r(0,34,90,4,'#FFF')),
+  'Namíbia':mkSVG(r(0,0,90,60,'#003580')+pg('90,0 90,60 0,60','#009A44')+pg('0,12 90,0 90,8 0,20','#FFF')+pg('0,40 90,52 90,60 0,48','#FFF')+pg('0,20 90,8 90,52 0,40','#CC0000')+cc(22,20,9,'#FCB514')),
+  'Sudão':mkSVG(sv(['#D21034','#FFF','#000'],'h')+pg('0,0 35,30 0,60','#007229')),
+  'Mongólia':mkSVG(r(0,0,25,60,'#C4272F')+r(25,0,40,60,'#015197')+r(65,0,25,60,'#C4272F')+'<text x="12" y="38" text-anchor="middle" font-size="18" fill="#F9CF02">ᠣ</text>'),
+  'Camboja':mkSVG(r(0,0,90,20,'#032EA1')+r(0,20,90,20,'#E00025')+r(0,40,90,20,'#032EA1')+'<text x="45" y="38" text-anchor="middle" font-size="18" fill="#FFF">⛩</text>'),
+  'Laos':mkSVG(r(0,0,90,10,'#CE1126')+r(0,10,90,40,'#002868')+r(0,50,90,10,'#CE1126')+cc(45,30,13,'#FFF')),
+  'Myanmar':mkSVG(sv(['#FECB00','#34B233','#EA2839'],'h')+'<text x="45" y="42" text-anchor="middle" font-size="28" fill="#FFF">★</text>'),
+  'Maldivas':mkSVG(r(0,0,90,60,'#D21034')+r(15,15,60,30,'#007E3A')+cc(40,30,10,'#FFF')+cc(44,30,9,'#007E3A')),
+  'Cazaquistão':mkSVG(r(0,0,90,60,'#00AFCA')+r(0,0,8,60,'#FFC72C')+'<text x="55" y="38" text-anchor="middle" font-size="20" fill="#FFC72C">☀</text>'),
+  'Geórgia':mkSVG(r(0,0,90,60,'#FFF')+r(42,0,6,60,'#FF0000')+r(0,27,90,6,'#FF0000')+r(10,8,4,13,'#FF0000')+r(4,13,16,3,'#FF0000')+r(70,8,4,13,'#FF0000')+r(64,13,16,3,'#FF0000')+r(10,39,4,13,'#FF0000')+r(4,44,16,3,'#FF0000')+r(70,39,4,13,'#FF0000')+r(64,44,16,3,'#FF0000')),
+  'Arménia':mkSVG(sv(['#D90012','#0033A0','#F2A800'],'h')),
+  'Azerbaijão':mkSVG(sv(['#0092BC','#EF3340','#509E2F'],'h')+cc(45,30,11,'#FFF')+cc(49,30,9,'#EF3340')+'<text x="55" y="27" font-size="7" fill="#FFF">★</text>'),
+  'Honduras':mkSVG(sv(['#0073CF','#FFF','#0073CF'],'h')+'<text x="24" y="34" text-anchor="middle" font-size="7" fill="#0073CF">★</text><text x="36" y="28" text-anchor="middle" font-size="7" fill="#0073CF">★</text><text x="45" y="34" text-anchor="middle" font-size="7" fill="#0073CF">★</text><text x="54" y="28" text-anchor="middle" font-size="7" fill="#0073CF">★</text><text x="66" y="34" text-anchor="middle" font-size="7" fill="#0073CF">★</text>'),
+  'Guatemala':mkSVG(sv(['#4997D0','#FFF','#4997D0'],'v')+'<text x="45" y="37" text-anchor="middle" font-size="16" fill="#5C8A3C">🦜</text>'),
+  'Costa Rica':mkSVG(r(0,0,90,10,'#002B7F')+r(0,10,90,10,'#FFF')+r(0,20,90,20,'#CE1126')+r(0,40,90,10,'#FFF')+r(0,50,90,10,'#002B7F')),
+  'Panamá':mkSVG(r(0,0,45,30,'#FFF')+r(45,0,45,30,'#EF3340')+r(0,30,45,30,'#005293')+r(45,30,45,30,'#FFF')+'<text x="22" y="22" text-anchor="middle" font-size="14" fill="#005293">★</text><text x="68" y="46" text-anchor="middle" font-size="14" fill="#EF3340">★</text>'),
+  'Haiti':mkSVG(r(0,0,90,30,'#00209F')+r(0,30,90,30,'#D21034')+cc(45,30,12,'#FFF')+'<text x="45" y="34" text-anchor="middle" font-size="8" fill="#5F4A1E">🌴</text>'),
+  'Trinidad':mkSVG(r(0,0,90,60,'#CE1126')+pg('8,0 22,0 90,56 90,60 76,60 8,8','#FFF')+pg('14,0 20,0 88,58 90,60 84,60 14,6','#000')),
+  'Kosovo':mkSVG(r(0,0,90,60,'#244AA5')+'<text x="45" y="40" text-anchor="middle" font-size="18" fill="#D4AF37">⌂</text><text x="45" y="18" text-anchor="middle" font-size="8" fill="#D4AF37">★ ★ ★ ★ ★ ★</text>'),
+  'Macedónia':mkSVG(r(0,0,90,60,'#CE2028')+r(43,0,4,60,'#F7DB04')+r(0,28,90,4,'#F7DB04')+pg('43,0 47,0 90,26 90,30','#F7DB04')+pg('0,0 4,0 45,28 43,28','#F7DB04')+pg('47,32 90,30 90,60 86,60','#F7DB04')+pg('0,60 0,30 43,32 45,32','#F7DB04')+cc(45,30,10,'#F7DB04')+cc(45,30,5,'#CE2028')),
+  'Moldávia':mkSVG(sv(['#003DA5','#FFD100','#CC0001'],'v')+'<text x="45" y="40" text-anchor="middle" font-size="20" fill="#CC0001">🦅</text>'),
+  'Bósnia':mkSVG(r(0,0,90,60,'#002395')+pg('90,0 90,60 30,60','#FCCA00')+'<text x="28" y="8" font-size="5" fill="#FFF">★</text><text x="34" y="15" font-size="5" fill="#FFF">★</text><text x="40" y="22" font-size="5" fill="#FFF">★</text><text x="46" y="29" font-size="5" fill="#FFF">★</text><text x="52" y="36" font-size="5" fill="#FFF">★</text><text x="58" y="43" font-size="5" fill="#FFF">★</text><text x="64" y="50" font-size="5" fill="#FFF">★</text><text x="70" y="57" font-size="5" fill="#FFF">★</text><text x="22" y="7" font-size="4" fill="#FFF">★</text><text x="76" y="56" font-size="4" fill="#FFF">★</text>'),
+  'Montenegro':mkSVG(r(0,0,90,60,'#D4AF37')+r(4,4,82,52,'#D4301A')+'<text x="45" y="42" text-anchor="middle" font-size="22" fill="#D4AF37">🦅</text>'),
+  'Malta':mkSVG(r(0,0,45,60,'#FFF')+r(45,0,45,60,'#CF142B')+r(6,22,14,4,'#CF142B')+r(11,17,4,14,'#CF142B')),
+  'Luxemburgo':mkSVG(sv(['#EF3340','#FFF','#00A1DE'],'h')),
+  'Mónaco':mkSVG(sv(['#CE1126','#FFF'],'h')),
+  'Coreia do Norte':mkSVG(r(0,0,90,60,'#024FA2')+r(0,8,90,44,'#BE0027')+r(0,8,90,5,'#FFF')+r(0,47,90,5,'#FFF')+cc(30,30,14,'#FFF')+cc(30,30,10,'#BE0027')+'<text x="30" y="34" text-anchor="middle" font-size="12" fill="#BE0027">★</text>'),
+  'Taiwan':mkSVG(r(0,0,90,60,'#FE0000')+r(0,0,45,30,'#000095')+cc(22,15,8,'#FFF')+'<text x="22" y="18" text-anchor="middle" font-size="10" fill="#000095">✦</text>'),
+  'Timor-Leste':mkSVG(r(0,0,90,60,'#DC241F')+pg('0,0 42,30 0,60','#FFC726')+pg('0,0 24,30 0,60','#000')+cc(14,30,7,'#FFF')+'<text x="14" y="33" text-anchor="middle" font-size="9" fill="#DC241F">★</text>'),
+  'Papua Nova Guiné':mkSVG(r(0,0,90,60,'#000')+pg('0,0 90,0 90,60','#CE1126')+'<text x="28" y="26" text-anchor="middle" font-size="14" fill="#FCD116">🦜</text><text x="70" y="15" text-anchor="middle" font-size="8" fill="#FFF">★</text><text x="78" y="26" text-anchor="middle" font-size="6" fill="#FFF">★</text><text x="82" y="35" text-anchor="middle" font-size="5" fill="#FFF">★</text><text x="76" y="43" text-anchor="middle" font-size="6" fill="#FFF">★</text>'),
+  'Palau':mkSVG(r(0,0,90,60,'#4AADD6')+cc(42,30,16,'#FFDE00')),
+  'Samoa':mkSVG(r(0,0,90,60,'#CE1126')+r(0,0,45,30,'#002868')+'<text x="22" y="15" text-anchor="middle" font-size="8" fill="#FFF">★</text><text x="30" y="22" text-anchor="middle" font-size="5" fill="#FFF">★</text><text x="28" y="28" text-anchor="middle" font-size="7" fill="#FFF">★</text><text x="16" y="26" text-anchor="middle" font-size="9" fill="#FFF">★</text><text x="12" y="18" text-anchor="middle" font-size="7" fill="#FFF">★</text>'),
+  'Fiji':mkSVG(r(0,0,90,60,'#68BFE5')+r(0,0,45,30,'#012169')+ln(0,0,45,30,'#FFF',6)+ln(45,0,0,30,'#FFF',6)+ln(0,0,45,30,'#C8102E',4)+ln(45,0,0,30,'#C8102E',4)+r(20,0,5,30,'#FFF')+r(0,12,45,6,'#FFF')+r(21,0,3,30,'#C8102E')+r(0,13,45,4,'#C8102E')),
 };
 
 const GEO_DATA=[
@@ -1529,13 +1584,77 @@ const GEO_DATA=[
   {flag:'Irão',country:'Irão',opts:['Irão','Iraque','Turquia','Afeganistão'],fact:'O Irão tem uma das civilizações mais antigas do mundo — o Império Persa remonta a 550 a.C.!',d:3},
   {flag:'Israel',country:'Israel',opts:['Israel','Jordânia','Líbano','Síria'],fact:'Israel tem a maior concentração de museus per capita do mundo e é líder em startups tecnológicas!',d:3},
   {flag:'Gana',country:'Gana',opts:['Gana','Costa do Marfim','Togo','Nigéria'],fact:'O Gana foi o primeiro país da África subsaariana a tornar-se independente, em 1957!',d:3},
+  // ── Additional entries ──
+  {flag:'Rússia',country:'Rússia',fact:'A Rússia é o maior país do mundo — abrange 11 fusos horários!',d:1},
+  {flag:'Catar',country:'Catar',fact:'O Catar foi a sede do Campeonato do Mundo de Futebol de 2022 no Médio Oriente!',d:2},
+  {flag:'Emirados Árabes',country:'Emirados Árabes',fact:'O Burj Khalifa nos EAU é o edifício mais alto do mundo com 828 metros!',d:2},
+  {flag:'Singapura',country:'Singapura',fact:'Singapura é uma das cidades mais limpas do mundo — existem multas por atirar lixo para o chão!',d:2},
+  {flag:'Bangladesh',country:'Bangladesh',fact:'Bangladesh tem a maior população do mundo em proporção à sua área!',d:2},
+  {flag:'Sri Lanka',country:'Sri Lanka',fact:'O Sri Lanka tem a maior coleção de elefantes selvagens da Ásia!',d:3},
+  {flag:'Jordânia',country:'Jordânia',fact:'A Jordânia é lar de Petra, a cidade rosa esculpida na rocha — uma das Sete Maravilhas!',d:2},
+  {flag:'Líbano',country:'Líbano',fact:'O Líbano tem o cedro como símbolo nacional — árvore mencionada na Bíblia!',d:3},
+  {flag:'Argélia',country:'Argélia',fact:'A Argélia é o maior país de África em área — maior que toda a Europa Ocidental!',d:2},
+  {flag:'Tunísia',country:'Tunísia',fact:'A Tunísia foi o berço da Primavera Árabe em 2010!',d:2},
+  {flag:'Líbia',country:'Líbia',fact:'A Líbia tem as maiores reservas de petróleo de toda a África!',d:3},
+  {flag:'Somália',country:'Somália',fact:'A Somália tem a linha costeira mais comprida de África com 3.333 km!',d:3},
+  {flag:'Tanzânia',country:'Tanzânia',fact:'A Tanzânia é lar do Kilimanjaro, o pico mais alto de África com 5.895 metros!',d:2},
+  {flag:'Uganda',country:'Uganda',fact:'Uganda é conhecida como a "Pérola de África" por Churchill — lar de metade dos gorilas de montanha do mundo!',d:2},
+  {flag:'Camarões',country:'Camarões',fact:'Os Camarões são chamados "África em miniatura" por terem todos os climas do continente!',d:2},
+  {flag:'Senegal',country:'Senegal',fact:'Dakar, capital do Senegal, era o ponto de chegada do famoso Rali Paris-Dakar!',d:2},
+  {flag:'Costa do Marfim',country:'Costa do Marfim',fact:'A Costa do Marfim é o maior produtor de cacau do mundo — responsável por 40% da produção global!',d:2},
+  {flag:'Ruanda',country:'Ruanda',fact:'O Ruanda é um dos países que mais recuperou em 30 anos — passou de tragédia a modelo de desenvolvimento!',d:3},
+  {flag:'Zimbabué',country:'Zimbabué',fact:'O Zimbabué é lar das Cataratas Vitória, uma das maiores cascatas do mundo!',d:2},
+  {flag:'Botswana',country:'Botswana',fact:'O Botswana tem a maior população de elefantes do mundo — mais de 130.000!',d:3},
+  {flag:'Namíbia',country:'Namíbia',fact:'A Namíbia tem o deserto mais antigo do mundo — o Namibe tem 55 milhões de anos!',d:3},
+  {flag:'Sudão',country:'Sudão',fact:'O Sudão tem mais pirâmides do que o Egito — mais de 200 pirâmides núbias!',d:3},
+  {flag:'Mongólia',country:'Mongólia',fact:'A Mongólia é o maior país sem saída para o mar do mundo e tem menos de 3 milhões de habitantes num território enorme!',d:2},
+  {flag:'Camboja',country:'Camboja',fact:'O Camboja tem Angkor Wat, o maior complexo religioso do mundo com mais de 400km²!',d:2},
+  {flag:'Laos',country:'Laos',fact:'O Laos é o único país da Ásia do Sudeste sem acesso ao mar!',d:3},
+  {flag:'Myanmar',country:'Myanmar',fact:'Myanmar tem mais de 2.000 pagodes dourados — o país é chamado "A Terra dos Pagodes"!',d:3},
+  {flag:'Maldivas',country:'Maldivas',fact:'As Maldivas são o país mais baixo do mundo — a altitude média é de apenas 1,5 metros!',d:2},
+  {flag:'Cazaquistão',country:'Cazaquistão',fact:'O Cazaquistão é o maior país sem acesso ao mar do mundo!',d:3},
+  {flag:'Geórgia',country:'Geórgia',fact:'A Geórgia tem um dos alfabetos mais antigos do mundo, datando do século V!',d:3},
+  {flag:'Arménia',country:'Arménia',fact:'A Arménia foi o primeiro país do mundo a adotar o Cristianismo como religião oficial, em 301 d.C.!',d:3},
+  {flag:'Azerbaijão',country:'Azerbaijão',fact:'O Azerbaijão é conhecido como "A Terra do Fogo" devido às suas reservas de petróleo e gás natural!',d:3},
+  {flag:'Honduras',country:'Honduras',fact:'Honduras significa "profundezas" em espanhol — os conquistadores acharam o oceano muito profundo perto da costa!',d:2},
+  {flag:'Guatemala',country:'Guatemala',fact:'A Guatemala é lar da civilização Maia — tem mais de 3.000 sítios arqueológicos Maias!',d:2},
+  {flag:'Costa Rica',country:'Costa Rica',fact:'A Costa Rica aboliu o exército em 1948 e usa esse dinheiro em educação e saúde!',d:1},
+  {flag:'Panamá',country:'Panamá',fact:'O Canal do Panamá liga o Oceano Atlântico ao Pacífico e reduz as viagens marítimas em 15.000 km!',d:1},
+  {flag:'Haiti',country:'Haiti',fact:'O Haiti foi o primeiro país da América Latina a tornar-se independente, em 1804!',d:2},
+  {flag:'Trinidad',country:'Trinidad e Tobago',fact:'Trinidad e Tobago é o berço do Carnaval e do ritmo calipso!',d:2},
+  {flag:'Kosovo',country:'Kosovo',fact:'O Kosovo declarou independência da Sérvia em 2008 — é um dos países mais jovens do mundo!',d:3},
+  {flag:'Macedónia',country:'Macedónia do Norte',fact:'A Macedónia do Norte tem um dos maiores lagos dos Balcãs — o Lago Ohrid tem mais de 3 milhões de anos!',d:3},
+  {flag:'Moldávia',country:'Moldávia',fact:'A Moldávia é o maior produtor de vinho per capita do mundo!',d:3},
+  {flag:'Bósnia',country:'Bósnia-Herzegovina',fact:'Sarajevo, capital da Bósnia, foi palco do assassinato que desencadeou a Primeira Guerra Mundial em 1914!',d:3},
+  {flag:'Montenegro',country:'Montenegro',fact:'Montenegro significa "Montanha Negra" em italiano — nome dado pelos venezianos!',d:3},
+  {flag:'Malta',country:'Malta',fact:'Malta é o menor estado membro da União Europeia, com apenas 316 km²!',d:3},
+  {flag:'Luxemburgo',country:'Luxemburgo',fact:'O Luxemburgo tem o PIB per capita mais alto da União Europeia!',d:3},
+  {flag:'Mónaco',country:'Mónaco',fact:'O Mónaco é o segundo menor país do mundo, com apenas 2 km²!',d:3},
+  {flag:'Coreia do Norte',country:'Coreia do Norte',fact:'A Coreia do Norte tem a única fronteira hermeticamente fechada do mundo desde 1953!',d:2},
+  {flag:'Taiwan',country:'Taiwan',fact:'Taiwan é um dos maiores produtores de semicondutores do mundo — a TSMC fabrica os chips mais avançados!',d:3},
+  {flag:'Timor-Leste',country:'Timor-Leste',fact:'Timor-Leste tornou-se independente em 2002 — um dos países mais jovens do mundo!',d:3},
+  {flag:'Papua Nova Guiné',country:'Papua Nova Guiné',fact:'Papua Nova Guiné tem mais de 850 línguas — a maior diversidade linguística do mundo!',d:3},
+  {flag:'Palau',country:'Palau',fact:'Palau foi um dos primeiros países a criar uma reserva marinha nacional protegendo 80% das suas águas!',d:3},
+  {flag:'Samoa',country:'Samoa',fact:'A Samoa foi o primeiro país a entrar no novo século — está no fuso horário UTC+13!',d:3},
+  {flag:'Fiji',country:'Fiji',fact:'Fiji é composta por 332 ilhas, das quais apenas 110 são habitadas!',d:3},
 ];
 
+function geoGenOpts(q){
+  const correct=q.country;
+  const qd=q.d||1;
+  // prefer distractors of same difficulty, fallback to all
+  let pool=GEO_DATA.filter(x=>x.country!==correct&&(x.d||1)===qd);
+  if(pool.length<3)pool=GEO_DATA.filter(x=>x.country!==correct);
+  return shuffle([correct,...shuffle(pool).slice(0,3).map(x=>x.country)]);
+}
 function startGeo(diffOverride){
   const prog=getGameProg('geo');
   const diff=diffOverride||getDiffForGameLevel(prog.level);
   const timeLimit=getTimerForDiff(15,diff);
-  CG={id:'geo',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:22,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,questions:shuffle(GEO_DATA).slice(0,10),diff};
+  // Filter pool by difficulty: easy=d:1, medium=d:1+2, hard=all
+  let pool=GEO_DATA.filter(q=>{const qd=q.d||1;if(diff===1)return qd===1;if(diff===2)return qd<=2;return true;});
+  if(pool.length<10)pool=GEO_DATA;
+  CG={id:'geo',total:10,correct:0,streak:0,maxStreak:0,xpEarned:0,gemsEarned:0,double2x:false,xpPerQ:22,timeLimit,timeLeft:timeLimit,timer:null,answered:false,qIndex:0,questions:shuffle(pool).slice(0,10),diff};
   showScreen('geoScreen');renderGeo();
 }
 function renderGeo(){
@@ -1549,7 +1668,7 @@ function renderGeo(){
   document.getElementById('geoTimerBadge').classList.remove('urgent');
   document.getElementById('flagWrap').innerHTML=FLAGS[q.flag]||'🏳️';
   document.getElementById('geoFact').classList.remove('show');
-  const opts=shuffle(q.opts.slice()),grid=document.getElementById('geoOptions');grid.innerHTML='';
+  const opts=geoGenOpts(q),grid=document.getElementById('geoOptions');grid.innerHTML='';
   opts.forEach(opt=>{
     const btn=document.createElement('button');btn.className='option-btn';btn.textContent=opt;
     btn.addEventListener('click',()=>{
