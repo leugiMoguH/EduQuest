@@ -17,6 +17,8 @@
 <div class="xp-popup" id="xpPop">+XP</div>
 <div class="combo-pop" id="comboPop"></div>
 <div class="toast" id="toast"></div>
+<div class="eq-almost" id="almostToast">Tão perto! ⌛ Mais um segundo!</div>
+<div class="eq-challenge-banner" id="eq-challenge-banner" style="display:none"></div>
 <div class="levelup-overlay" id="lvlOverlay">
   <div class="levelup-box">
     <div style="font-size:5rem">🏆</div>
@@ -53,6 +55,37 @@
     <div class="ai-err-title">⚠️ Sem ligação à IA</div>
     <div class="ai-err-sub" id="aiErrSub">A usar perguntas guardadas localmente</div>
     <button class="ai-retry" id="aiRetry">Tentar novamente 🔄</button>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="eq-onboarding" id="eq-onboarding" style="display:none">
+  <div class="eq-onboard-box">
+    <div class="eq-onboard-icon" id="eq-onboard-icon">⏱️</div>
+    <div class="eq-onboard-title" id="eq-onboard-title">Responde rápido!</div>
+    <div class="eq-onboard-desc" id="eq-onboard-desc">...</div>
+    <div class="eq-onboard-dots" id="eq-onboard-dots"></div>
+    <button class="big-btn" id="eq-onboard-btn">Próximo →</button>
+  </div>
+</div>
+
+<!-- AVATAR MODAL -->
+<div class="eq-avatar-modal" id="eq-avatar-modal" style="display:none">
+  <div class="eq-avatar-box">
+    <div class="eq-avatar-modal-title">Personalizar EDU</div>
+    <div class="eq-avatar-grid" id="eq-avatar-grid"></div>
+    <button class="big-btn secondary" id="eq-avatar-close">Fechar</button>
+  </div>
+</div>
+
+<!-- WEEKLY REPORT -->
+<div class="eq-week-report" id="eq-week-report" style="display:none">
+  <div class="eq-week-box">
+    <div class="eq-week-title">📊 Relatório Semanal</div>
+    <div class="eq-week-subtitle">A tua semana em EduQuest</div>
+    <div class="eq-week-stats" id="eq-week-stats"></div>
+    <button class="big-btn" id="eq-week-share">📸 Partilhar Semana</button>
+    <button class="big-btn secondary" id="eq-week-close" style="margin-top:8px">Fechar</button>
   </div>
 </div>
 
@@ -318,6 +351,9 @@
       <div class="result-stat"><span class="rs-val" id="rsXP">0</span><span class="rs-label">XP</span></div>
       <div class="result-stat"><span class="rs-val" id="rsGems">0</span><span class="rs-label">💎</span></div>
     </div>
+    <div id="eq-vs-edu-result" style="display:none;font-size:.85rem;font-weight:700;margin:8px 0;padding:10px;background:var(--glass);border-radius:10px"></div>
+    <div id="eq-leaderboard" style="display:none;margin-bottom:12px"></div>
+    <div id="eq-diff-badge" style="display:none;margin-bottom:8px"></div>
     <button class="big-btn" id="playAgainBtn">Jogar de Novo 🔄</button>
     <button class="big-btn secondary" id="resultHomeBtn">Dashboard 🏠</button>
   </div>
@@ -379,6 +415,18 @@
         <span class="diff-label">Difícil</span>
         <span class="diff-desc">Para experts</span>
       </button>
+      <button class="diff-btn diff-expert" id="diffExpert" aria-label="Dificuldade expert">
+        <span class="diff-icon">💀</span>
+        <span class="diff-label">Expert</span>
+        <span class="diff-desc">Nível 10 req.</span>
+        <span class="diff-lock" id="diffExpertLock"></span>
+      </button>
+      <button class="diff-btn diff-nightmare" id="diffNightmare" aria-label="Dificuldade nightmare">
+        <span class="diff-icon">☠️</span>
+        <span class="diff-label">Nightmare</span>
+        <span class="diff-desc">Nível 20 req.</span>
+        <span class="diff-lock" id="diffNightmareLock"></span>
+      </button>
     </div>
     <button class="big-btn secondary" id="diffCancelBtn" aria-label="Cancelar e voltar">Cancelar</button>
   </div>
@@ -405,7 +453,8 @@
   </button>
 </nav>
 
-<script src="assets/js/content-expansion.js?v=4"></script>
+<script src="assets/js/content-expansion.js?v=5"></script>
 <script src="assets/js/app.js?v=4"></script>
+<script src="assets/js/features.js?v=3"></script>
 </body>
 </html>

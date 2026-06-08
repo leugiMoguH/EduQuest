@@ -750,6 +750,42 @@ function playSound(type){
         g.gain.exponentialRampToValueAtTime(.001,now+i*.08+.2);
         o.connect(g);g.connect(master);o.start(now+i*.08);o.stop(now+i*.08+.2);
       });
+    }else if(type==='streak'){
+      // Rising streak chime: C5→E5→G5
+      [523,659,784].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='triangle';o.frequency.value=f;
+        g.gain.setValueAtTime(0,now+i*.09);
+        g.gain.linearRampToValueAtTime(.24,now+i*.09+.04);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.09+.22);
+        o.connect(g);g.connect(master);o.start(now+i*.09);o.stop(now+i*.09+.22);
+      });
+    }else if(type==='gem'){
+      // Sparkle: two bright high tones
+      [1047,1319].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(0,now+i*.07);
+        g.gain.linearRampToValueAtTime(.2,now+i*.07+.02);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.18);
+        o.connect(g);g.connect(master);o.start(now+i*.07);o.stop(now+i*.07+.18);
+      });
+    }else if(type==='tick'){
+      // Urgent tick for last 3 seconds
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='square';o.frequency.value=880;
+      g.gain.setValueAtTime(.08,now);g.gain.exponentialRampToValueAtTime(.001,now+.06);
+      o.connect(g);g.connect(master);o.start(now);o.stop(now+.06);
+    }else if(type==='powerup'){
+      // Magic chord arp: F4→A4→C5→F5
+      [349,440,523,698].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(0,now+i*.07);
+        g.gain.linearRampToValueAtTime(.22,now+i*.07+.04);
+        g.gain.exponentialRampToValueAtTime(.001,now+i*.07+.28);
+        o.connect(g);g.connect(master);o.start(now+i*.07);o.stop(now+i*.07+.28);
+      });
     }
   }catch(e){}
 }
@@ -1016,6 +1052,8 @@ function scoreAnswer(ok){
     const gems=CG.streak>=3?2:0;CG.gemsEarned+=gems;
     showXP('+'+xp+'XP'+(CG.streak>=3?' 🔥':'')+(gems?' +'+gems+'💎':''));
     vibrate([15,0,15,0,30]);playSound('success');
+    if(gems>0)setTimeout(()=>playSound('gem'),180);
+    if(CG.streak>0&&CG.streak%3===0)setTimeout(()=>playSound('streak'),120);
     if(CG.streak>=3){const cp=document.getElementById('comboPop');cp.textContent=CG.streak>=10?'🌟 x'+CG.streak+' LENDÁRIO!':CG.streak>=5?'⚡ x'+CG.streak+' INSANO!':'🔥 x'+CG.streak+' COMBO!';cp.classList.remove('show','hide');void cp.offsetWidth;setTimeout(()=>{cp.classList.add('show');setTimeout(()=>{cp.classList.remove('show');cp.classList.add('hide');},1200);},50);}
     // Confetti on streak ≥5 or hard question
     if(CG.streak>=5||(CG.questions[CG.qIndex]&&(CG.questions[CG.qIndex].d===3||(CG.questions[CG.qIndex].d||1)===3)))launchConfetti(40);
@@ -1314,7 +1352,7 @@ function renderAIQ(){
   CG.timer=setInterval(()=>{
     CG.timeLeft--;
     document.getElementById('gameTimer').textContent=CG.timeLeft;
-    if(CG.timeLeft<=5)document.getElementById('gameTimerBadge').classList.add('urgent');
+    if(CG.timeLeft<=5){document.getElementById('gameTimerBadge').classList.add('urgent');if(CG.timeLeft<=3&&CG.timeLeft>0)playSound('tick');}
     if(CG.timeLeft<=0){
       clearInterval(CG.timer);
       if(!CG.answered){
@@ -2132,6 +2170,7 @@ const DAILY_FACTS=[
 // ================================================================
 createStars();buildGameGrid();buildAch();buildShop();updateHUD();updateEdu();
 initDayStreak();initFactoDia();initDailyChallenge();
+if(typeof initFeatures==='function')initFeatures();
 // Rotate Edu phrases every 8s
 setInterval(()=>{if(document.getElementById('dashboard').classList.contains('active'))updateEdu();},8000);
 // Mute button
